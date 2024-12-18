@@ -35,176 +35,178 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF4285F4),
       body: SafeArea(
-          child: SingleChildScrollView(
-        child: Column(
-          children: [
-            Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.only(top: 30, bottom: 20),
-              child: const Text(
-                'Tạo Tài Khoản',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                padding: const EdgeInsets.only(top: 30, bottom: 20),
+                child: const Text(
+                  'Tạo Tài Khoản',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFE8F0FE),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+              Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8F0FE),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
                 ),
-              ),
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildTextField(
-                      label: 'Tên',
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                    ),
-                    _buildTextField(
-                      label: 'Email',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    _buildTextField(
-                      label: 'Số điện thoại',
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                    ),
-                    _buildDropdownField(
-                      label: 'Giới tính',
-                      value: _selectedGender,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedGender = newValue;
-                        });
-                      },
-                      items: _genderOptions,
-                    ),
-                    _buildDropdownField(
-                      label: 'Vai trò',
-                      value: _selectedRole,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _selectedRole = newValue;
-                        });
-                      },
-                      items: _roleOptions,
-                    ),
-                    _buildTextField(
-                      label: 'Mật khẩu',
-                      controller: _passwordController,
-                      keyboardType: TextInputType.text,
-                      obscureText: true,
-                    ),
-                    _buildTextField(
-                      label: 'Nhập lại mật khẩu',
-                      controller: _confirmPasswordController,
-                      keyboardType: TextInputType.text,
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 16),
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Bằng cách nhấp vào Đăng ký, bạn đồng ý với ',
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12),
-                            ),
-                            Text(
-                              'Điều khoản',
-                              style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              ',',
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Chính sách quyền riêng tư',
-                              style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              ' của chúng tôi.',
-                              style: TextStyle(
-                                  color: Colors.grey[600], fontSize: 12),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          print('Name: ${_nameController.text}');
-                          print('Email: ${_emailController.text}');
-                          print('Phone: ${_phoneController.text}');
-                          print('Gender: $_selectedGender');
-                          print('Role: $_selectedRole');
-                          print('Password: ${_passwordController.text}');
-                          print('Confirm Password: ${_confirmPasswordController.text}');
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4285F4),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                padding: const EdgeInsets.all(16),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildTextField(
+                        label: 'Tên',
+                        controller: _nameController,
+                        keyboardType: TextInputType.name,
                       ),
-                      child: const Text(
-                        'Đăng ký',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      _buildTextField(
+                        label: 'Email',
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () {
-                          // Handle navigation to login screen
+                      _buildTextField(
+                        label: 'Số điện thoại',
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      _buildDropdownField(
+                        label: 'Giới tính',
+                        value: _selectedGender,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedGender = newValue;
+                          });
                         },
+                        items: _genderOptions,
+                      ),
+                      _buildDropdownField(
+                        label: 'Vai trò',
+                        value: _selectedRole,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _selectedRole = newValue;
+                          });
+                        },
+                        items: _roleOptions,
+                      ),
+                      _buildTextField(
+                        label: 'Mật khẩu',
+                        controller: _passwordController,
+                        keyboardType: TextInputType.text,
+                        obscureText: true,
+                      ),
+                      _buildTextField(
+                        label: 'Nhập lại mật khẩu',
+                        controller: _confirmPasswordController,
+                        keyboardType: TextInputType.text,
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Bằng cách nhấp vào Đăng ký, bạn đồng ý với ',
+                                style: TextStyle(
+                                    color: Colors.grey[600], fontSize: 12),
+                              ),
+                              Text(
+                                'Điều khoản',
+                                style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                ',',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Chính sách quyền riêng tư',
+                                style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                ' của chúng tôi.',
+                                style: TextStyle(
+                                    color: Colors.grey[600], fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            print('Name: ${_nameController.text}');
+                            print('Email: ${_emailController.text}');
+                            print('Phone: ${_phoneController.text}');
+                            print('Gender: $_selectedGender');
+                            print('Role: $_selectedRole');
+                            print('Password: ${_passwordController.text}');
+                            print(
+                                'Confirm Password: ${_confirmPasswordController.text}');
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4285F4),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
                         child: const Text(
-                          'Bạn đã có tài khoản?',
-                          style: TextStyle(color: Colors.blue),
+                          'Đăng ký',
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 16),
+                      Center(
+                        child: TextButton(
+                          onPressed: () {
+                            // Handle navigation to login screen
+                          },
+                          child: const Text(
+                            'Bạn đã có tài khoản?',
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      )),
+      ),
     );
   }
 
@@ -249,6 +251,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
   Widget _buildDropdownField({
     required String label,
     required String? value,

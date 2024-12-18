@@ -38,82 +38,52 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           style: TextStyle(color: Colors.black),
         ),
       ),
-      body: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints viewportConstraints) {
-          return Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                SizedBox(height: viewportConstraints.maxHeight * 0.03),
-                Center(
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8F0FE),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Image.asset(
-                      'images/forgot_password.png',
-                      width: 250,
-                      height: 250,
-                    ),
-                  ),
-                ),
-                SizedBox(height: viewportConstraints.maxHeight * 0.03),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child:  const Text(
-                    'Vui lòng nhập email của bạn để \n nhận mã xác minh',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.black87),
-                  ),
-                ),
-                SizedBox(height: 50,),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Email',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 16,
-                        ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(30),
+                topRight: Radius.circular(30),
+              ),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8F0FE),
+                        shape: BoxShape.circle,
                       ),
-                      TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                        focusNode: _emailFocusNode,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          focusedBorder:  OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.blue.shade800),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Vui lòng nhập Email';
-                          }
-                          return null;
-                        },
-                        onEditingComplete: () {
-                          FocusScope.of(context).unfocus();
-                        },
+                      padding: EdgeInsets.only(top: 50, bottom: 30),
+                      child: Image.asset(
+                        'images/forgot_password.png',
+                        width: 250,
+                        height: 250,
                       ),
-                    ],
+                    ),
                   ),
-                ),
-                SizedBox(height: 30,),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: ElevatedButton(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child:  const Text(
+                      'Vui lòng nhập email của bạn để \n nhận mã xác minh',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black87),
+                    ),
+                  ),
+                  SizedBox(height: 50,),
+                  _buildTextField(
+                    label: 'Email',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    obscureText: true,
+                  ),
+                  SizedBox(height: 50,),
+                  ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
                         print('Email: ${_emailController.text}');
@@ -135,12 +105,59 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                   ),
-                ),
-                SizedBox(height: viewportConstraints.maxHeight * 0.03),
-              ],
+                ],
+              ),
             ),
-          );
-        },
+          ),
+        ),
+      )
+    );
+  }
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required TextInputType keyboardType,
+    bool obscureText = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
+            ),
+          ),
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              // Thêm viền mặc định
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.grey, width: 1),
+              ),
+              // Viền khi được focus
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.blue, width: 2),
+              ),
+
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng nhập $label';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
     );
   }

@@ -56,29 +56,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 20,),
-                    _InputTextField(
+                    _buildTextField(
                       label: 'Email',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Vui lòng nhập Email';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 20,),
-                    _InputTextField(
+                    _buildTextField(
                       label: 'Mật khẩu',
                       controller: _passwordController,
-                      obscureText: true,
-                      keyboardType: TextInputType.text,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Vui lòng nhập Mật khẩu';
-                        }
-                        return null;
-                      },
+                      keyboardType: TextInputType.phone,
                     ),
                     Align(
                       alignment: Alignment.topRight,
@@ -131,17 +117,40 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        _SocialLoginButton(
-                          imagePath: 'images/logo_google.png',
+                      children: [
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE8F0FE),
+                            shape: BoxShape.circle,
+                          ),
+                          padding: EdgeInsets.only(right: 10, left: 10),
+                          child: Image.asset(
+                            'images/logo_google.png',
+                            width: 30,
+                            height: 30,
+                          ),
                         ),
-                        _SocialLoginButton(
-                          imagePath: 'images/logo_facebook.png',
-                          size: 50,
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE8F0FE),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'images/logo_facebook.png',
+                            width: 50,
+                            height: 50,
+                          ),
                         ),
-                        _SocialLoginButton(
-                          imagePath: 'images/logo_apple.png',
-                          size: 50,
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE8F0FE),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset(
+                            'images/logo_apple.png',
+                            width: 50,
+                            height: 50,
+                          ),
                         ),
                       ],
                     ),
@@ -154,74 +163,46 @@ class _LoginScreenState extends State<LoginScreen> {
       )
     );
   }
-}
-
-class _InputTextField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final TextInputType keyboardType;
-  final bool obscureText;
-  final String? Function(String?)? validator;
-
-  const _InputTextField({
-    required this.label,
-    required this.controller,
-    required this.keyboardType,
-    this.obscureText = false,
-    required this.validator,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 20,
-          ),
-        ),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required TextInputType keyboardType,
+    bool obscureText = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 16,
             ),
           ),
-          validator: validator,
-        ),
-      ],
-    );
-  }
-}
-
-class _SocialLoginButton extends StatelessWidget {
-  final String imagePath;
-  final double size;
-
-  const _SocialLoginButton({
-    required this.imagePath,
-    this.size = 30,
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {},
-      icon: Image.asset(
-        imagePath,
-        width: size,
-        height: size,
+          TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide.none,
+              ),
+            ),
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Vui lòng nhập $label';
+              }
+              return null;
+            },
+          ),
+        ],
       ),
     );
   }
 }
+
