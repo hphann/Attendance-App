@@ -5,6 +5,7 @@ import 'package:attendance/Account/VerifyEmailScreen.dart';
 
 import 'package:attendance/screens/homeScreen.dart';
 import 'package:attendance/screens/detailScreen.dart';
+import 'package:attendance/screens/absenceRegistrationScreen.dart';
 
 import 'package:flutter/material.dart';
 
