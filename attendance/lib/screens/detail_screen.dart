@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:attendance/widgets/attendanceHistoryCard.dart';
-import 'package:attendance/widgets/attendanceMethodsSheet.dart';
+import 'package:attendance/widgets/attendance_history_card.dart';
+import 'package:attendance/widgets/attendance_methods_sheet.dart';
 
 class DetailScreen extends StatelessWidget {
   const DetailScreen({Key? key}) : super(key: key);
