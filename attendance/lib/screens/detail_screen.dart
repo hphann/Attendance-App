@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:attendance/widgets/attendanceHistoryCard.dart';
+import 'package:attendance/widgets/attendance_history_card.dart';
+import 'package:attendance/widgets/attendance_methods_sheet.dart';
 
 class DetailScreen extends StatelessWidget {
   const DetailScreen({Key? key}) : super(key: key);
+
+  void _showAttendanceMethods(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => const AttendanceMethodsSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +57,7 @@ class DetailScreen extends StatelessWidget {
               _buildInfoRow('Số người tham gia:', '29 thành viên'),
               _buildInfoRow('Địa điểm:', 'Trung tâm hội nghị\nThành Phát'),
               const SizedBox(height: 24),
-              _buildActionButtons(),
+              _buildActionButtons(context),
               const SizedBox(height: 24),
               _buildAttendanceHistory(),
             ],
@@ -85,12 +96,12 @@ class DetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () => _showAttendanceMethods(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
               padding: const EdgeInsets.symmetric(vertical: 12),
