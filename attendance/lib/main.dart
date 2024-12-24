@@ -1,24 +1,30 @@
+import 'package:attendance/Account/SignUpScreen.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:attendance/Account/CreateNewPasswordScreen.dart';
 import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:attendance/Account/LoginScreen.dart';
 import 'package:attendance/Account/VerifyEmailScreen.dart';
 
-import 'package:attendance/screens/home_screen.dart';
-import 'package:attendance/screens/detail_screen.dart';
-import 'package:attendance/screens/absence_registration_screen.dart';
-import 'package:attendance/screens/organizer_dashboard_screen.dart';
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const MyApp());
+}
 
-import 'package:flutter/material.dart';
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      primarySwatch: Colors.blue,
-    ),
-    home: Scaffold(
-      body: OrganizerDashboardScreen(),
-      // body: SignUpScreen(),
-    ),
-  ));
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        body: SignUpScreen(),
+      ),
+    );
+  }
 }

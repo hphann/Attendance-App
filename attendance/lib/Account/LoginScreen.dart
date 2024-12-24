@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -82,8 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ElevatedButton(
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
-                          print(
-                              'Email: ${_emailController.text}, Password: ${_passwordController.text}');
+                          _loginUser();
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -203,6 +203,48 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
+  }
+  Future<void> _loginUser() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vui lòng điền đầy đủ thông tin')),
+      );
+      return;
+    }
+
+    try {
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập thành công!')),
+      );
+
+      Navigator.pushReplacementNamed(context, '/main');
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'Không tìm thấy người dùng với email này.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Sai mật khẩu.';
+          break;
+        default:
+          errorMessage = 'Đăng nhập thất bại. Vui lòng thử lại.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+      );
+    }
   }
 }
 

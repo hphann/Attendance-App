@@ -1,4 +1,7 @@
+import 'package:attendance/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -167,8 +170,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             print('Gender: $_selectedGender');
                             print('Role: $_selectedRole');
                             print('Password: ${_passwordController.text}');
-                            print(
-                                'Confirm Password: ${_confirmPasswordController.text}');
+                            print('Confirm Password: ${_confirmPasswordController.text}');
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => HomeScreen()),
+                            );
+                          }
+                          if (_formKey.currentState!.validate()) {
+                            _registerUser();
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -297,5 +307,71 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ],
       ),
     );
+  }
+  Future<void> _registerUser() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
+    final String confirmPassword = _confirmPasswordController.text.trim();
+    final String name = _nameController.text.trim();
+    final String phone = _phoneController.text.trim();
+    final String? gender = _selectedGender;
+    final String? role = _selectedRole;
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mật khẩu và xác nhận mật khẩu không khớp')),
+      );
+      return;
+    }
+    if (phone.length != 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Số điện thoại không hợp lệ')),
+      );
+      return;
+    }
+
+    try {
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      final String userId = userCredential.user!.uid;
+
+      await FirebaseFirestore.instance.collection('Users').doc(userId).set({
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'gender': gender,
+        'role': role,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng ký thành công!')),
+      );
+
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'email-already-in-use':
+          errorMessage = 'Email đã được sử dụng.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Email không hợp lệ.';
+          break;
+        case 'weak-password':
+          errorMessage = 'Mật khẩu quá yếu.';
+          break;
+        default:
+          errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+      );
+    }
   }
 }
