@@ -1,6 +1,10 @@
+import 'package:attendance/Account/ForgotPasswordScreen.dart';
+import 'package:attendance/Account/SignUpScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import '../screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,7 +74,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.topRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                          );
+                        },
                         child: Text(
                           'Quên mật khẩu?',
                           style: TextStyle(
@@ -102,7 +111,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 16),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignUpScreen()),
+                        );
+                      },
                       child: Text(
                         'Tạo tài khoản',
                         style: TextStyle(color: Colors.blue[800]),
@@ -223,7 +237,10 @@ class _LoginScreenState extends State<LoginScreen> {
         const SnackBar(content: Text('Đăng nhập thành công!')),
       );
 
-      Navigator.pushReplacementNamed(context, '/main');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
     } on FirebaseAuthException catch (e) {
       String errorMessage;
       switch (e.code) {

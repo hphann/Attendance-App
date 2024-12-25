@@ -11,7 +11,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -85,9 +84,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   SizedBox(height: 50,),
                   ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        print('Email: ${_emailController.text}');
-                      }
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4285F4),

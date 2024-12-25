@@ -1,3 +1,4 @@
+import 'package:attendance/Account/LoginScreen.dart';
 import 'package:attendance/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -171,11 +172,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             print('Role: $_selectedRole');
                             print('Password: ${_passwordController.text}');
                             print('Confirm Password: ${_confirmPasswordController.text}');
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (context) => HomeScreen()),
-                            );
                           }
                           if (_formKey.currentState!.validate()) {
                             _registerUser();
@@ -201,7 +197,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       Center(
                         child: TextButton(
                           onPressed: () {
-                            // Handle navigation to login screen
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginScreen()),
+                            );
                           },
                           child: const Text(
                             'Bạn đã có tài khoản?',
@@ -308,6 +307,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
   Future<void> _registerUser() async {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
@@ -347,6 +347,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng ký thành công!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
 
     } on FirebaseAuthException catch (e) {
