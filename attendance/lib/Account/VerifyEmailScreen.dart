@@ -1,7 +1,12 @@
+import 'package:attendance/Account/CreateNewPasswordScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class VerifyEmailScreen extends StatefulWidget {
-  const VerifyEmailScreen({super.key});
+  final String email;
+
+  const VerifyEmailScreen({super.key, required this.email});
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
@@ -9,14 +14,62 @@ class VerifyEmailScreen extends StatefulWidget {
 
 class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final FocusNode _emailFocusNode = FocusNode();
+  final _codeController = TextEditingController();
+  late TextEditingController _emailController;
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController = TextEditingController(text: widget.email);
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _emailFocusNode.dispose();
+    _codeController.dispose();
     super.dispose();
+  }
+
+  Future<bool> verifyCode(String email, String code) async {
+    final url = Uri.parse('http://10.0.2.2:3000/api/auth/verify-code');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email, 'code': code}),
+    );
+
+    if (response.statusCode == 200) {
+      return true; // Mã xác minh đúng
+    } else {
+      final data = json.decode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${data['message']}')),
+      );
+      return false; // Mã xác minh sai
+    }
+  }
+
+  Future<bool> sendResetEmail(String email) async {
+    final url = Uri.parse('http://10.0.2.2:3000/api/auth/forgot-password');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Mã xác minh đã được gửi đến email của bạn')),
+      );
+      return true; // Trả về true nếu email được gửi thành công
+    } else {
+      final data = json.decode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${data['message']}')),
+      );
+      return false; // Trả về false nếu có lỗi
+    }
   }
 
   @override
@@ -69,33 +122,63 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child:  const Text(
-                      'Vui lòng nhập mã gồm 4 chữ số \n được gửi tới email của bạn',
+                    child: const Text(
+                      'Vui lòng nhập mã gồm 6 chữ số \n được gửi tới email của bạn',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ),
-                  SizedBox(height: 50,),
+                  SizedBox(
+                    height: 50,
+                  ),
                   _buildTextField(
-                    label: 'Email',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    label: 'Mã xác minh',
+                    controller: _codeController,
+                    keyboardType: TextInputType.number,
                     obscureText: true,
                   ),
-                  SizedBox(height: 15,),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child:  const Text(
+                  SizedBox(
+                    height: 15,
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      bool isSent = await sendResetEmail(widget.email);
+                      if (isSent) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Mã xác minh đã được gửi lại')),
+                        );
+                      }
+                    },
+                    child: const Text(
                       'Gửi lại mã',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 50,),
+                  SizedBox(
+                    height: 50,
+                  ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_formKey.currentState!.validate()) {
-                        print('Email: ${_emailController.text}');
+                        bool isVerified = await verifyCode(
+                            _emailController.text.trim(),
+                            _codeController.text.trim());
+                        if (isVerified) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateNewPasswordScreen(
+                                email: _emailController.text.trim(),
+                              ),
+                            ),
+                          );
+                        }
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -106,7 +189,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Gửi',
+                      'Xác minh',
                       style: TextStyle(
                         fontSize: 20,
                         color: Colors.white,
@@ -122,6 +205,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       ),
     );
   }
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -143,7 +227,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
-            obscureText: obscureText,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
@@ -157,7 +240,6 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
-
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {

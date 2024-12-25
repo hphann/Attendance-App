@@ -1,4 +1,7 @@
+import 'package:attendance/Account/VerifyEmailScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -11,11 +14,35 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
+  bool isLoading = false;
+
   @override
   void dispose() {
     _emailController.dispose();
     _emailFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<bool> sendResetEmail(String email) async {
+    final url = Uri.parse('http://10.0.2.2:3000/api/auth/forgot-password');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'email': email}),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mã xác minh đã được gửi đến email của bạn')),
+      );
+      return true;  // Trả về true nếu email được gửi thành công
+    } else {
+      final data = json.decode(response.body);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${data['message']}')),
+      );
+      return false;  // Trả về false nếu có lỗi
+    }
   }
 
   @override
@@ -58,7 +85,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         color: Color(0xFFE8F0FE),
                         shape: BoxShape.circle,
                       ),
-                      padding: EdgeInsets.only(top: 50, bottom: 30),
+                      padding: const EdgeInsets.only(top: 50, bottom: 30),
                       child: Image.asset(
                         'images/forgot_password.png',
                         width: 250,
@@ -66,25 +93,44 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child:  const Text(
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
                       'Vui lòng nhập email của bạn để \n nhận mã xác minh',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50),
                   _buildTextField(
                     label: 'Email',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    obscureText: true,
                   ),
-                  SizedBox(height: 50,),
+                  const SizedBox(height: 50),
                   ElevatedButton(
-                    onPressed: () {
-
+                    onPressed: isLoading
+                        ? null
+                        : () async {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          isLoading = true;
+                        });
+                        bool isSent = await sendResetEmail(_emailController.text.trim());
+                        setState(() {
+                          isLoading = false;
+                        });
+                        if (isSent) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VerifyEmailScreen(
+                                email: _emailController.text.trim(),
+                              ),
+                            ),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4285F4),
@@ -93,7 +139,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text(
+                    child: isLoading
+                        ? const CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
+                        : const Text(
                       'Gửi',
                       style: TextStyle(
                         fontSize: 20,
@@ -107,14 +157,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
           ),
         ),
-      )
+      ),
     );
   }
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
     required TextInputType keyboardType,
-    bool obscureText = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -131,25 +181,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
-            obscureText: obscureText,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              // Thêm viền mặc định
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
-              // Viền khi được focus
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.blue, width: 2),
               ),
-
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Vui lòng nhập $label';
+              } else if (!_isValidEmail(value)) {
+                return 'Email không hợp lệ';
               }
               return null;
             },
@@ -157,5 +205,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ],
       ),
     );
+  }
+
+  bool _isValidEmail(String email) {
+    // Kiểm tra email hợp lệ
+    final emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    return emailRegExp.hasMatch(email);
   }
 }

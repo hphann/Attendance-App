@@ -48,21 +48,21 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _buildTextField(
+                _buildPassField(
                   label: 'Mật khẩu hiện tại',
                   controller: _currentPasswordController,
                   keyboardType: TextInputType.text,
                   obscureText: true,
                 ),
                 const SizedBox(height: 20),
-                _buildTextField(
+                _buildPassField(
                   label: 'Mật khẩu mới',
                   controller: _newPasswordController,
                   keyboardType: TextInputType.text,
                   obscureText: true,
                 ),
                 const SizedBox(height: 20),
-                _buildTextField(
+                _buildPassField(
                   label: 'Nhập lại mật khẩu mới',
                   controller: _confirmPasswordController,
                   keyboardType: TextInputType.text,
@@ -78,7 +78,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Thêm logic xử lý đổi mật khẩu
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Đổi mật khẩu thành công!')),
                       );
@@ -108,55 +107,70 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 
-  Widget _buildTextField({
+  Widget _buildPassField({
     required String label,
     required TextEditingController controller,
     required TextInputType keyboardType,
     bool obscureText = false,
     String? Function(String?)? validator,
-    Widget? suffix,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 16,
+
+    bool _isObscure = obscureText;
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                ),
+              ),
+              TextFormField(
+                controller: controller,
+                keyboardType: keyboardType,
+                obscureText: _isObscure, // Ẩn/hiện mật khẩu
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.grey, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  ),
+                  suffixIcon: obscureText
+                      ? IconButton(
+                    icon: Icon(
+                      _isObscure ? Icons.visibility_off : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _isObscure = !_isObscure;
+                      });
+                    },
+                  )
+                      : null,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Vui lòng nhập $label';
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white,
-            suffixIcon: suffix,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: const BorderSide(color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: const BorderSide(color: Colors.blue),
-            ),
-          ),
-          validator: validator ??
-                  (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Vui lòng nhập $label';
-                }
-                return null;
-              },
-        ),
-      ],
+        );
+      },
     );
   }
 }
