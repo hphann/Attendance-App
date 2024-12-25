@@ -26,7 +26,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
 
   Future<void> _changePassword(String email, String password) async {
     const url =
-        'http://10.0.2.2:3000/api/auth/change-password'; // Thay đổi URL phù hợp với backend
+        'http://10.0.2.2:3000/api/auth/change-password';
     try {
       final response = await http.post(
         Uri.parse(url),
