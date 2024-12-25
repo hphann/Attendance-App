@@ -1,4 +1,5 @@
 import 'package:attendance/Account/CreateNewPasswordScreen.dart';
+import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -82,7 +83,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+            );
           },
         ),
         centerTitle: true,
