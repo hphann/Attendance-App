@@ -69,21 +69,22 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: const Color(0xFF4285F4),
-        body: SafeArea(
+      backgroundColor: const Color(0xFF4285F4),
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: SingleChildScrollView(
           child: Column(
             children: [
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.only(bottom: 10, left: 40),
-                  alignment: Alignment.bottomLeft,
-                  child: const Text(
-                    'Xin chào',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+              Container(
+                height: MediaQuery.of(context).size.height * 0.4,
+                padding: const EdgeInsets.only(bottom: 10, left: 40),
+                alignment: Alignment.bottomLeft,
+                child: const Text(
+                  'Xin chào',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -101,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const SizedBox(height: 20,),
+                      const SizedBox(height: 20),
                       _buildTextField(
                         label: 'Email',
                         controller: _emailController,
@@ -119,7 +120,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => ForgotPasswordScreen()),
                             );
                           },
                           child: Text(
@@ -130,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 30,),
+                      const SizedBox(height: 30),
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
@@ -156,7 +158,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => SignUpScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => SignUpScreen()),
                           );
                         },
                         child: Text(
@@ -164,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: Colors.blue[800]),
                         ),
                       ),
-                      const SizedBox(height: 25,),
+                      const SizedBox(height: 25),
                       const Text(
                         'Hoặc đăng nhập với',
                         style: TextStyle(color: Colors.black54, fontSize: 16),
@@ -179,7 +182,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Color(0xFFE8F0FE),
                               shape: BoxShape.circle,
                             ),
-                            padding: EdgeInsets.only(right: 10, left: 10),
+                            padding:
+                            const EdgeInsets.only(right: 10, left: 10),
                             child: Image.asset(
                               'images/logo_google.png',
                               width: 30,
@@ -216,9 +220,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ],
           ),
-        )
+        ),
+      ),
     );
   }
+
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -286,7 +292,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: controller,
                 keyboardType: keyboardType,
-                obscureText: _isObscure, // Ẩn/hiện mật khẩu
+                obscureText: _isObscure,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -298,7 +304,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(8),
                     borderSide: const BorderSide(color: Colors.blue, width: 2),
                   ),
-                  // Thêm biểu tượng hình mắt ở bên phải
                   suffixIcon: obscureText
                       ? IconButton(
                     icon: Icon(
@@ -307,11 +312,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     onPressed: () {
                       setState(() {
-                        _isObscure = !_isObscure; // Thay đổi trạng thái
+                        _isObscure = !_isObscure;
                       });
                     },
                   )
-                      : null, // Không hiển thị biểu tượng nếu không phải trường mật khẩu
+                      : null,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {

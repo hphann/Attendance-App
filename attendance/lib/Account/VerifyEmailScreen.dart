@@ -40,13 +40,13 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     );
 
     if (response.statusCode == 200) {
-      return true; // Mã xác minh đúng
+      return true;
     } else {
       final data = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${data['message']}')),
       );
-      return false; // Mã xác minh sai
+      return false;
     }
   }
 
@@ -63,13 +63,13 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         const SnackBar(
             content: Text('Mã xác minh đã được gửi đến email của bạn')),
       );
-      return true; // Trả về true nếu email được gửi thành công
+      return true;
     } else {
       final data = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${data['message']}')),
       );
-      return false; // Trả về false nếu có lỗi
+      return false;
     }
   }
 
@@ -234,12 +234,12 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-              // Thêm viền mặc định
+
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
-              // Viền khi được focus
+
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.blue, width: 2),

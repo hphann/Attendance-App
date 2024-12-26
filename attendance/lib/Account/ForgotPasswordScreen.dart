@@ -36,13 +36,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Mã xác minh đã được gửi đến email của bạn')),
       );
-      return true;  // Trả về true nếu email được gửi thành công
+      return true;
     } else {
       final data = json.decode(response.body);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${data['message']}')),
       );
-      return false;  // Trả về false nếu có lỗi
+      return false;
     }
   }
 
@@ -212,7 +212,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   bool _isValidEmail(String email) {
-    // Kiểm tra email hợp lệ
     final emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegExp.hasMatch(email);
   }

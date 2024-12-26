@@ -97,7 +97,6 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.edit,
                   label: 'Chỉnh sửa thông tin',
                   onTap: () {
-                    // Xử lý chỉnh sửa thông tin
                   },
                 ),
                 SizedBox(height: 10,),
@@ -106,7 +105,6 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.lock,
                   label: 'Đổi mật khẩu',
                   onTap: () {
-                    // Xử lý đổi mật khẩu
                   },
                 ),
                 SizedBox(height: 10,),
@@ -115,7 +113,6 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.language,
                   label: 'Ngôn ngữ',
                   onTap: () {
-                    // Xử lý thay đổi ngôn ngữ
                   },
                 ),
                 SizedBox(height: 10,),
@@ -126,7 +123,6 @@ class AccountScreen extends StatelessWidget {
                   iconColor: Colors.red,
                   textColor: Colors.red,
                   onTap: () {
-                    // Xử lý đăng xuất
                   },
                 ),
               ],

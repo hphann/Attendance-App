@@ -134,7 +134,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               TextFormField(
                 controller: controller,
                 keyboardType: keyboardType,
-                obscureText: _isObscure, // Ẩn/hiện mật khẩu
+                obscureText: _isObscure,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
