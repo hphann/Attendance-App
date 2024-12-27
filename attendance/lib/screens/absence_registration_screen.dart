@@ -121,6 +121,7 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white
                     ),
                   ),
                 ),

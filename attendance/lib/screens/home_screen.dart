@@ -1,3 +1,4 @@
+import 'package:attendance/Account/AccountScreen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -26,9 +27,21 @@ Widget _buildHeader() {
     padding: const EdgeInsets.all(16.0),
     child: Row(
       children: [
-        const CircleAvatar(
-          radius: 20,
-          backgroundImage: AssetImage('images/avatar.jpg'),
+        Builder(
+          builder: (context) => GestureDetector(
+            onTap: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AccountScreen(),
+                ),
+              );
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage('images/avatar.png'),
+            ),
+          ),
         ),
         const SizedBox(
           width: 12,
@@ -52,6 +65,7 @@ Widget _buildHeader() {
     ),
   );
 }
+
 
 Widget _buildBody() {
   return ListView.builder(

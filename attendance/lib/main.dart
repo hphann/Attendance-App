@@ -1,4 +1,10 @@
+import 'package:attendance/Account/AccountScreen.dart';
+import 'package:attendance/Account/EditInfoScreen.dart';
 import 'package:attendance/Account/SignUpScreen.dart';
+import 'package:attendance/screens/absence_registration_screen.dart';
+import 'package:attendance/screens/detail_screen.dart';
+import 'package:attendance/screens/home_screen.dart';
+import 'package:attendance/screens/organizer_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:attendance/Account/CreateNewPasswordScreen.dart';
@@ -23,7 +29,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: Scaffold(
-        body: LoginScreen(),
+        body: HomeScreen(),
       ),
     );
   }

@@ -22,26 +22,26 @@ class OrganizerDashboardScreen extends StatelessWidget {
         child: const Icon(Icons.add),
         backgroundColor: Colors.blue,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Trang chủ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner),
-            label: 'Quét QR',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Cá nhân',
-          ),
-        ],
-        currentIndex: 0,
-        onTap: (index) {
-          // Handle navigation
-        },
-      ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   items: const [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       label: 'Trang chủ',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.qr_code_scanner),
+      //       label: 'Quét QR',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.person),
+      //       label: 'Cá nhân',
+      //     ),
+      //   ],
+      //   currentIndex: 0,
+      //   onTap: (index) {
+      //     // Handle navigation
+      //   },
+      // ),
     );
   }
 }
@@ -53,7 +53,7 @@ Widget _buildHeader() {
       children: [
         const CircleAvatar(
           radius: 20,
-          backgroundImage: AssetImage('images/avatar.jpg'),
+          backgroundImage: AssetImage('images/avatar.png'),
         ),
         const SizedBox(
           width: 12,

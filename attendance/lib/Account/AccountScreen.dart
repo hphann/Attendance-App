@@ -1,3 +1,5 @@
+import 'package:attendance/Account/EditInfoScreen.dart';
+import 'package:attendance/Account/LoginScreen.dart';
 import 'package:flutter/material.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -26,7 +28,7 @@ class AccountScreen extends StatelessWidget {
                       fontSize: 30,
                       fontWeight: FontWeight.bold),
                 ),
-              )),
+              ),),
           Container(
             child: Container(
               decoration: const BoxDecoration(
@@ -97,6 +99,11 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.edit,
                   label: 'Chỉnh sửa thông tin',
                   onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => EditInfoScreen()),
+                    );
                   },
                 ),
                 SizedBox(height: 10,),
@@ -123,6 +130,11 @@ class AccountScreen extends StatelessWidget {
                   iconColor: Colors.red,
                   textColor: Colors.red,
                   onTap: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => LoginScreen()),
+                    );
                   },
                 ),
               ],
