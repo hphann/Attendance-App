@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../screens/home_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -62,6 +63,40 @@ class _LoginScreenState extends State<LoginScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
+
+  Future<void> _loginWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        // Người dùng hủy đăng nhập
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Đăng nhập vào Firebase
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đăng nhập Google thành công!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Đăng nhập Google thất bại: $e')),
       );
     }
   }
@@ -132,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
                           if (_formKey.currentState!.validate()) {
@@ -167,52 +202,42 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: TextStyle(color: Colors.blue[800]),
                         ),
                       ),
-                      const SizedBox(height: 25),
+                      const SizedBox(height: 8),
                       const Text(
-                        'Hoặc đăng nhập với',
+                        'Hoặc',
                         style: TextStyle(color: Colors.black54, fontSize: 16),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE8F0FE),
-                              shape: BoxShape.circle,
-                            ),
-                            padding:
-                            const EdgeInsets.only(right: 10, left: 10),
-                            child: Image.asset(
-                              'images/logo_google.png',
-                              width: 30,
-                              height: 30,
-                            ),
+                      GestureDetector(
+                        onTap: _loginWithGoogle,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.grey.shade300),
                           ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE8F0FE),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Image.asset(
-                              'images/logo_facebook.png',
-                              width: 50,
-                              height: 50,
-                            ),
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'images/logo_google.png',
+                                width: 20,
+                                height: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              const Text(
+                                "Đăng nhập với Google",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFE8F0FE),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Image.asset(
-                              'images/logo_apple.png',
-                              width: 50,
-                              height: 50,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),

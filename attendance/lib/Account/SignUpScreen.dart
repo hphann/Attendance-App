@@ -17,12 +17,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   String? _selectedGender;
-  String? _selectedRole;
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
   final List<String> _genderOptions = ['Nam', 'Nữ', 'Khác'];
-  final List<String> _roleOptions = ['Người tổ chức', 'Người tham gia'];
 
   @override
   void dispose() {
@@ -41,7 +39,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final String name = _nameController.text.trim();
     final String phone = _phoneController.text.trim();
     final String? gender = _selectedGender;
-    final String? role = _selectedRole;
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +64,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'email': email,
         'phone': phone,
         'gender': gender,
-        'role': role,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
@@ -169,16 +165,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             });
                           },
                           items: _genderOptions,
-                        ),
-                        _buildDropdownField(
-                          label: 'Vai trò',
-                          value: _selectedRole,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _selectedRole = newValue;
-                            });
-                          },
-                          items: _roleOptions,
                         ),
                         _buildTextField(
                           label: 'Mật khẩu',
