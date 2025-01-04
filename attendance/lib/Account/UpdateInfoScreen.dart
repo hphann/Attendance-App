@@ -1,51 +1,69 @@
-import 'package:attendance/Account/LoginScreen.dart';
 import 'package:attendance/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
-class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+class UpdateInfoScreen extends StatefulWidget {
+  const UpdateInfoScreen({super.key});
 
   @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
+  State<UpdateInfoScreen> createState() => _UpdateInfoScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class _UpdateInfoScreenState extends State<UpdateInfoScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   String? _selectedGender;
-  final _passwordController = TextEditingController();
-  final _confirmPasswordController = TextEditingController();
-
   final List<String> _genderOptions = ['Nam', 'Nữ', 'Khác'];
+
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo AnimationController
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    // Định nghĩa animation opacity (ảnh mờ dần)
+    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeIn, // Đường cong hiệu ứng
+      ),
+    );
+
+    // Định nghĩa animation slide (di chuyển ảnh từ trái sang)
+    _slideAnimation = Tween<Offset>(begin: const Offset(-1.0, 0.0), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // Bắt đầu animation
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _nameController.dispose();
-    _emailController.dispose();
     _phoneController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  Future<void> _registerUser() async {
-    final String email = _emailController.text.trim();
-    final String password = _passwordController.text.trim();
-    final String confirmPassword = _confirmPasswordController.text.trim();
+  Future<void> _updateUserInfo() async {
     final String name = _nameController.text.trim();
     final String phone = _phoneController.text.trim();
     final String? gender = _selectedGender;
 
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mật khẩu và xác nhận mật khẩu không khớp')),
-      );
-      return;
-    }
     if (phone.length != 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Số điện thoại không hợp lệ')),
@@ -54,46 +72,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
 
     try {
-      final UserCredential userCredential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: email, password: password);
+      final User? user = FirebaseAuth.instance.currentUser;
 
-      final String userId = userCredential.user!.uid;
+      if (user != null) {
+        // Lấy email của người dùng
+        final String email = user.email ?? '';
 
-      await FirebaseFirestore.instance.collection('Users').doc(userId).set({
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'gender': gender,
-      });
+        // Kiểm tra xem thông tin người dùng đã có trong Firestore chưa
+        final userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng ký thành công!')),
-      );
+        if (!userDoc.exists) {
+          // Người dùng chưa có thông tin, tạo mới tài liệu
+          await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+            'name': name,
+            'phone': phone,
+            'gender': gender,
+            'email': email,  // Lưu email
+          });
+        } else {
+          // Nếu thông tin đã có thì chỉ cần cập nhật
+          await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({
+            'name': name,
+            'phone': phone,
+            'gender': gender,
+            'email': email,  // Cập nhật email nếu cần
+          });
+        }
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cập nhật thông tin thành công!')),
+        );
 
-    } on FirebaseAuthException catch (e) {
-      String errorMessage;
-      switch (e.code) {
-        case 'email-already-in-use':
-          errorMessage = 'Email đã được sử dụng.';
-          break;
-        case 'invalid-email':
-          errorMessage = 'Email không hợp lệ.';
-          break;
-        case 'weak-password':
-          errorMessage = 'Mật khẩu quá yếu.';
-          break;
-        default:
-          errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
+        // Quay lại màn hình chính
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        // Người dùng chưa đăng nhập
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng đăng nhập trước khi cập nhật thông tin')),
+        );
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: ${e.toString()}')),
@@ -112,17 +132,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            child: Column(
+            child:
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
                   alignment: Alignment.center,
                   padding: const EdgeInsets.only(top: 30, bottom: 20),
                   child: const Text(
-                    'Tạo Tài Khoản',
+                    'Cập Nhật Thông Tin',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                    ),
+                  ),
+                ),
+                Center(
+                  child: FadeTransition(
+                    opacity: _opacityAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Container(
+                        padding: EdgeInsets.only(top: 50, bottom: 30),
+                        child: Lottie.asset(
+                          'animation/update.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                          width: 250,
+                          height: 250,
+                          repeat: true,  // Nếu muốn lặp lại animation
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -145,16 +184,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           controller: _nameController,
                           keyboardType: TextInputType.name,
                         ),
-                        _buildTextField(
-                          label: 'Email',
-                          controller: _emailController,
-                          keyboardType: TextInputType.emailAddress,
-                        ),
+                        const SizedBox(height: 10),
                         _buildTextField(
                           label: 'Số điện thoại',
                           controller: _phoneController,
                           keyboardType: TextInputType.phone,
                         ),
+                        const SizedBox(height: 10),
                         _buildDropdownField(
                           label: 'Giới tính',
                           value: _selectedGender,
@@ -165,69 +201,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           },
                           items: _genderOptions,
                         ),
-                        _buildTextField(
-                          label: 'Mật khẩu',
-                          controller: _passwordController,
-                          keyboardType: TextInputType.text,
-                          obscureText: true,
-                        ),
-                        _buildTextField(
-                          label: 'Nhập lại mật khẩu',
-                          controller: _confirmPasswordController,
-                          keyboardType: TextInputType.text,
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 16),
-                        Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Bằng cách nhấp vào Đăng ký, bạn đồng ý với ',
-                                  style: TextStyle(
-                                      color: Colors.grey[600], fontSize: 12),
-                                ),
-                                Text(
-                                  'Điều khoản',
-                                  style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  ',',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  'Chính sách quyền riêng tư',
-                                  style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  ' của chúng tôi.',
-                                  style: TextStyle(
-                                      color: Colors.grey[600], fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 50),
                         ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
-                              _registerUser();
+                              _updateUserInfo();
                             }
                           },
                           style: ElevatedButton.styleFrom(
@@ -238,7 +216,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ),
                           child: const Text(
-                            'Đăng ký',
+                            'Cập nhật',
                             style: TextStyle(
                               fontSize: 20,
                               color: Colors.white,
@@ -247,21 +225,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        Center(
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginScreen()),
-                              );
-                            },
-                            child: const Text(
-                              'Bạn đã có tài khoản?',
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          ),
-                        ),
                       ],
                     ),
                   ),
@@ -278,7 +241,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     required String label,
     required TextEditingController controller,
     required TextInputType keyboardType,
-    bool obscureText = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
@@ -295,7 +257,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           TextFormField(
             controller: controller,
             keyboardType: keyboardType,
-            obscureText: obscureText,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
@@ -307,9 +268,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Vui lòng nhập $label';
-              }
-              if (label.contains('Mật khẩu') && value.length < 6) {
-                return 'Mật khẩu phải có ít nhất 6 ký tự';
               }
               return null;
             },

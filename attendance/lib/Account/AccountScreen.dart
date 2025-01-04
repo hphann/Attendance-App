@@ -1,6 +1,7 @@
 import 'package:attendance/Account/EditInfoScreen.dart';
 import 'package:attendance/Account/LoginScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({super.key});
@@ -11,24 +12,25 @@ class AccountScreen extends StatelessWidget {
       body: Column(
         children: [
           Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Colors.blue,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(50),
-                  bottomRight: Radius.circular(50),
-                ),
+            width: double.infinity,
+            decoration: const BoxDecoration(
+              color: Colors.blue,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(50),
+                bottomRight: Radius.circular(50),
               ),
-              padding: const EdgeInsets.only(top: 50, bottom: 20),
-              child: Center(
-                child: Text(
-                  'Tài khoản',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold),
-                ),
-              ),),
+            ),
+            padding: const EdgeInsets.only(top: 50, bottom: 20),
+            child: Center(
+              child: Text(
+                'Tài khoản',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
           Container(
             child: Container(
               decoration: const BoxDecoration(
@@ -88,7 +90,7 @@ class AccountScreen extends StatelessWidget {
               borderRadius: BorderRadius.all(
                 Radius.circular(20),
               ),
-              color: const Color(0xFFE9F2FE),
+              color: Color(0xFFE9F2FE),
             ),
             margin: EdgeInsets.all(20),
             padding: EdgeInsets.all(15),
@@ -106,34 +108,40 @@ class AccountScreen extends StatelessWidget {
                     );
                   },
                 ),
-                SizedBox(height: 10,),
+                SizedBox(height: 10),
                 _buildMenuItem(
                   context,
                   icon: Icons.lock,
                   label: 'Đổi mật khẩu',
                   onTap: () {
+                    // Bạn có thể thêm logic cho việc đổi mật khẩu ở đây
                   },
                 ),
-                SizedBox(height: 10,),
+                SizedBox(height: 10),
                 _buildMenuItem(
                   context,
                   icon: Icons.language,
                   label: 'Ngôn ngữ',
                   onTap: () {
+                    // Bạn có thể thêm logic cho việc thay đổi ngôn ngữ ở đây
                   },
                 ),
-                SizedBox(height: 10,),
+                SizedBox(height: 10),
                 _buildMenuItem(
                   context,
                   icon: Icons.logout,
                   label: 'Đăng xuất',
                   iconColor: Colors.red,
                   textColor: Colors.red,
-                  onTap: () {
+                  onTap: () async {
+                    // Xóa trạng thái đăng nhập trong SharedPreferences
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    prefs.setBool('isLoggedIn', false); // Đánh dấu là chưa đăng nhập
+
+                    // Điều hướng về màn hình đăng nhập
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => LoginScreen()),
+                      MaterialPageRoute(builder: (context) => LoginScreen()),
                     );
                   },
                 ),
@@ -147,10 +155,10 @@ class AccountScreen extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context,
       {required IconData icon,
-      required String label,
-      Color iconColor = Colors.black,
-      Color textColor = Colors.black,
-      VoidCallback? onTap}) {
+        required String label,
+        Color iconColor = Colors.black,
+        Color textColor = Colors.black,
+        VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: iconColor),
       title: Text(

@@ -3,19 +3,22 @@ import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: _buildBody(),
-            ),
-          ],
+        child: Hero(
+          tag: "login_button",
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: _buildBody(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -65,7 +68,6 @@ Widget _buildHeader() {
     ),
   );
 }
-
 
 Widget _buildBody() {
   return ListView.builder(

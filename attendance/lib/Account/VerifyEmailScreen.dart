@@ -3,6 +3,7 @@ import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:lottie/lottie.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   final String email;
@@ -117,10 +118,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         shape: BoxShape.circle,
                       ),
                       padding: EdgeInsets.only(top: 50, bottom: 30),
-                      child: Image.asset(
-                        'images/email.png',
+                      child: Lottie.asset(
+                        'animation/email.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
                         width: 250,
                         height: 250,
+                        repeat: true,  // Nếu muốn lặp lại animation
                       ),
                     ),
                   ),

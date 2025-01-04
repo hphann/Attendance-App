@@ -3,6 +3,7 @@ import 'package:attendance/Account/VerifyEmailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:lottie/lottie.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -90,10 +91,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         shape: BoxShape.circle,
                       ),
                       padding: const EdgeInsets.only(top: 50, bottom: 30),
-                      child: Image.asset(
-                        'images/forgot_password.png',
+                      child: Lottie.asset(
+                        'animation/forgot_password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
                         width: 250,
                         height: 250,
+                        repeat: true,  // Nếu muốn lặp lại animation
                       ),
                     ),
                   ),

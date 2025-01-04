@@ -1,10 +1,13 @@
 import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:attendance/Account/SignUpScreen.dart';
+import 'package:attendance/Account/UpdateInfoScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import '../screens/home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -13,15 +16,40 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  late AnimationController _animationController;
+  late Animation<Offset> _slideAnimation;
+  bool isLoadingSystem = false;
+  bool isLoadingGoogle = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
+
+    // Định nghĩa animation trượt
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOut, // Đường cong hiệu ứng
+    ));
+
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -39,6 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
+
+      // Lưu trạng thái đăng nhập vào SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', true);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công!')),
@@ -86,14 +118,32 @@ class _LoginScreenState extends State<LoginScreen> {
       // Đăng nhập vào Firebase
       final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đăng nhập Google thành công!')),
-      );
+      // Kiểm tra xem thông tin người dùng đã tồn tại trong Firestore chưa
+      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).get();
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
+      // Lưu trạng thái đăng nhập vào SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool('isLoggedIn', true);
+
+      if (userDoc.exists) {
+        // Người dùng đã có thông tin trong Firestore, chuyển đến HomeScreen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đăng nhập Google thành công!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      } else {
+        // Người dùng chưa có thông tin trong Firestore, chuyển đến UpdateInfoScreen
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đăng nhập Google thành công! Bạn cần cập nhật thông tin.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => UpdateInfoScreen()),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Đăng nhập Google thất bại: $e')),
@@ -110,16 +160,19 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.4,
-                padding: const EdgeInsets.only(bottom: 10, left: 40),
-                alignment: Alignment.bottomLeft,
-                child: const Text(
-                  'Xin chào',
-                  style: TextStyle(
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+              SlideTransition(
+                position: _slideAnimation,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.4,
+                  padding: const EdgeInsets.only(bottom: 10, left: 40),
+                  alignment: Alignment.bottomLeft,
+                  child: const Text(
+                    'Xin chào',
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -169,9 +222,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 20),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: isLoadingSystem
+                            ? null // Nếu đang tải, không cho phép nhấn nút
+                            : () async {
                           if (_formKey.currentState!.validate()) {
-                            _loginUser();
+                            setState(() {
+                              isLoadingSystem = true; // Đang tải, bật loading
+                            });
+                            await _loginUser(); // Thực hiện đăng nhập
+                            setState(() {
+                              isLoadingSystem = false; // Đăng nhập xong, tắt loading
+                            });
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -181,7 +242,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const Text(
+                        child: isLoadingSystem
+                            ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                            : const Text(
                           'Đăng nhập',
                           style: TextStyle(
                             fontSize: 20,
@@ -212,7 +277,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       GestureDetector(
-                        onTap: _loginWithGoogle,
+                        onTap: isLoadingGoogle
+                            ? null
+                            : () async {
+                          setState(() {
+                            isLoadingGoogle = true;
+                          });
+                          await _loginWithGoogle();
+                          setState(() {
+                            isLoadingGoogle = false;
+                          });
+                        },
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -220,7 +295,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             border: Border.all(color: Colors.grey.shade300),
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                          child: Row(
+                          alignment: Alignment.center, // Đảm bảo vòng tròn nằm giữa
+                          child: isLoadingGoogle
+                              ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                            ),
+                          )
+                              : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Image.asset(
@@ -251,7 +335,6 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
-
 
   Widget _buildTextField({
     required String label,
