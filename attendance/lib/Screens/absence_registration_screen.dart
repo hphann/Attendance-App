@@ -1,4 +1,4 @@
-// lib/screens/absence_registration_screen.dart
+// lib/Screens/absence_registration_screen.dart
 import 'package:flutter/material.dart';
 
 class AbsenceRegistrationScreen extends StatefulWidget {

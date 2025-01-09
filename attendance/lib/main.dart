@@ -1,35 +1,21 @@
+import 'package:attendance/Screens/MainScreen.dart';
+import 'package:attendance/screens/detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:attendance/Account/AccountScreen.dart';
-import 'package:attendance/Account/EditInfoScreen.dart';
-import 'package:attendance/Account/SignUpScreen.dart';
-import 'package:attendance/Account/UpdateInfoScreen.dart';
-import 'package:attendance/screens/absence_registration_screen.dart';
-import 'package:attendance/screens/detail_screen.dart';
-import 'package:attendance/screens/home_screen.dart';
-import 'package:attendance/screens/organizer_dashboard_screen.dart';
-import 'package:attendance/Account/CreateNewPasswordScreen.dart';
-import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:attendance/Account/LoginScreen.dart';
-import 'package:attendance/Account/VerifyEmailScreen.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  bool isLoggedIn = await checkLoginStatus();
-  runApp(MyApp(isLoggedIn));
-}
-
-Future<bool> checkLoginStatus() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getBool('isLoggedIn') ?? false; // trả về false nếu chưa có giá trị
+  await initializeDateFormatting('vi_VN', null);
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final bool isLoggedIn;
-  const MyApp(this.isLoggedIn);
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,8 +23,50 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Scaffold(
-        body: isLoggedIn ? HomeScreen() : LoginScreen(),
+      home: SplashScreen(), // Hiển thị màn hình SplashScreen đầu tiên
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToNextScreen(); // Kiểm tra trạng thái đăng nhập và điều hướng
+  }
+
+  Future<void> _navigateToNextScreen() async {
+    await Future.delayed(Duration(seconds: 2)); // Giả lập thời gian tải
+    bool isLoggedIn = await checkLoginStatus();
+
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MainScreen()), // Chuyển đến DetailScreen
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()), // Chuyển đến LoginScreen
+      );
+    }
+  }
+
+  Future<bool> checkLoginStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('isLoggedIn') ?? false; // Trả về false nếu chưa có giá trị
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(), // Biểu tượng tải
       ),
     );
   }

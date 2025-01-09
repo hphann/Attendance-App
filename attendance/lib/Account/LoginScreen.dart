@@ -1,13 +1,14 @@
 import 'package:attendance/Account/ForgotPasswordScreen.dart';
 import 'package:attendance/Account/SignUpScreen.dart';
 import 'package:attendance/Account/UpdateInfoScreen.dart';
+import 'package:attendance/Screens/MainScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import '../screens/home_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Screens/HomeScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -78,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
     } on FirebaseAuthException catch (e) {
       String errorMessage;
@@ -132,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         );
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } else {
         // Người dùng chưa có thông tin trong Firestore, chuyển đến UpdateInfoScreen
