@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: SplashScreen(), // Hiển thị màn hình SplashScreen đầu tiên
+      home: SplashScreen(),
     );
   }
 }
@@ -47,12 +47,12 @@ class _SplashScreenState extends State<SplashScreen> {
     if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()), // Chuyển đến DetailScreen
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()), // Chuyển đến LoginScreen
+        MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     }
   }

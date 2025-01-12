@@ -9,7 +9,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedTab = 0;
+  int selectedTab = 0;
   final List<Map<String, dynamic>> _attendanceData = [
     {
       'className': 'Lập trình di động',
@@ -91,27 +91,27 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   ];
 
-  List<Map<String, dynamic>> _getFilteredAttendanceData() {
+  List<Map<String, dynamic>> getFilteredAttendanceData() {
     final now = DateTime.now();
-    switch (_selectedTab) {
+    switch (selectedTab) {
       case 0: // Sắp tới
         return _attendanceData
-            .where((item) => _isEventUpcoming(item, now))
+            .where((item) => isEventUpcoming(item, now))
             .toList();
       case 1: // Đang diễn ra
         return _attendanceData
-            .where((item) => _isEventOngoing(item, now))
+            .where((item) => isEventOngoing(item, now))
             .toList();
       case 2: // Đã kết thúc
         return _attendanceData
-            .where((item) => _isEventCompleted(item, now))
+            .where((item) => isEventCompleted(item, now))
             .toList();
       default:
         return _attendanceData;
     }
   }
 
-  bool _isEventUpcoming(Map<String, dynamic> item, DateTime now) {
+  bool isEventUpcoming(Map<String, dynamic> item, DateTime now) {
     if (item['repeat'] == null) {
       return item['date'].isAfter(now);
     } else if (item['repeat'] == 'weekly') {
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  bool _isEventOngoing(Map<String, dynamic> item, DateTime now) {
+  bool isEventOngoing(Map<String, dynamic> item, DateTime now) {
     if (item['repeat'] == null) {
       return item['date'].isAtSameMomentAs(now) ||
           (item['date'].isBefore(now) &&
@@ -167,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  bool _isEventCompleted(Map<String, dynamic> item, DateTime now) {
+  bool isEventCompleted(Map<String, dynamic> item, DateTime now) {
     if(item['repeat'] == null){
       return item['date'].isBefore(now);
     }else if (item['repeat'] == 'weekly') {
@@ -198,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onTabSelected(int index) {
     setState(() {
-      _selectedTab = index;
+      selectedTab = index;
     });
   }
 
@@ -206,25 +206,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundImage: const AssetImage('images/avatar.png'),
-              onBackgroundImageError: (exception, stackTrace) {
-                const Icon(Icons.person, size: 36, color: Colors.grey);
-              },
-            ),
-            const SizedBox(width: 10),
-            const Text(
-              'Ứng dụng Điểm danh',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Ứng dụng Điểm danh',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: Colors.blue,
       ),
@@ -241,22 +229,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 10),
-            _buildAttendanceSummary(),
+            buildAttendanceSummary(),
+            const SizedBox(height: 5),
+            buildAttendanceSummary2(),
             const SizedBox(height: 20),
-            _buildAttendanceSummary2(),
-            const SizedBox(height: 20),
-            _buildTabs(),
+            buildTabs(),
             const SizedBox(height: 20),
             Expanded(
               child: ListView(
-                  children: _getFilteredAttendanceData().map((item) {
-                    return _buildAttendanceCard(
+                  children: getFilteredAttendanceData().map((item) {
+                    return buildAttendanceCard(
                       className: item['className'],
                       time: item['time'],
                       date: item['repeat'] == null
                           ? DateFormat('dd/MM/yyyy').format(item['date'])
-                          : _formatRepeatedEventDate(item),
-                      status: _selectedTab == 0 ? '' : item['status'],
+                          : formatRepeatedEventDate(item),
+                      status: selectedTab == 0 ? '' : item['status'],
                       location: item['location'],
                       organizer: item['organizer'],
                     );
@@ -268,7 +256,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  String _formatRepeatedEventDate(Map<String, dynamic> item) {
+  String formatRepeatedEventDate(Map<String, dynamic> item) {
     if (item['repeat'] == 'weekly') {
       String days = '';
       for (var i = 0; i < item['daysOfWeek'].length; i++) {
@@ -283,17 +271,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildAttendanceSummary() {
+  Widget buildAttendanceSummary() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildSummaryCard(
+        buildSummaryCard(
           title: 'Đã điểm danh',
           value: '15',
           color: Colors.green[100]!,
         ),
-        const SizedBox(width: 8),
-        _buildSummaryCard(
+        const SizedBox(width: 5),
+        buildSummaryCard(
           title: 'Vắng',
           value: '2',
           color: Colors.red[100]!,
@@ -302,17 +290,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAttendanceSummary2() {
+  Widget buildAttendanceSummary2() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildSummaryCard(
+        buildSummaryCard(
           title: 'Chưa điểm danh',
           value: '3',
           color: Colors.orange[100]!,
         ),
-        const SizedBox(width: 8),
-        _buildSummaryCard(
+        const SizedBox(width: 5),
+        buildSummaryCard(
           title: 'Tổng buổi học',
           value: '20',
           color: Colors.blue[100]!,
@@ -321,7 +309,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildSummaryCard({
+  Widget buildSummaryCard({
     required String title,
     required String value,
     required Color color,
@@ -366,23 +354,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTabs() {
+  Widget buildTabs() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Wrap(
         spacing: 10,
         runSpacing: 8,
         children: [
-          _buildTabButton(title: 'Sắp tới', index: 0),
-          _buildTabButton(title: 'Đang diễn ra', index: 1),
-          _buildTabButton(title: 'Đã kết thúc', index: 2),
+          buildTabButton(title: 'Sắp tới', index: 0),
+          buildTabButton(title: 'Đang diễn ra', index: 1),
+          buildTabButton(title: 'Đã kết thúc', index: 2),
         ],
       ),
     );
   }
 
-  Widget _buildTabButton({required String title, required int index}) {
-    bool isSelected = _selectedTab == index;
+  Widget buildTabButton({required String title, required int index}) {
+    bool isSelected = selectedTab == index;
     return GestureDetector(
       onTap: () => _onTabSelected(index),
       child: Container(
@@ -405,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAttendanceCard({
+  Widget buildAttendanceCard({
     required String className,
     required String time,
     required String date,

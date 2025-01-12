@@ -8,8 +8,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Screens/HomeScreen.dart';
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -17,7 +15,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -109,7 +108,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -117,10 +117,14 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       );
 
       // Đăng nhập vào Firebase
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Kiểm tra xem thông tin người dùng đã tồn tại trong Firestore chưa
-      final userDoc = await FirebaseFirestore.instance.collection('Users').doc(userCredential.user!.uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .get();
 
       // Lưu trạng thái đăng nhập vào SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -138,7 +142,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       } else {
         // Người dùng chưa có thông tin trong Firestore, chuyển đến UpdateInfoScreen
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng nhập Google thành công! Bạn cần cập nhật thông tin.')),
+          const SnackBar(
+              content: Text(
+                  'Đăng nhập Google thành công! Bạn cần cập nhật thông tin.')),
         );
         Navigator.pushReplacement(
           context,
@@ -226,16 +232,18 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         onPressed: isLoadingSystem
                             ? null // Nếu đang tải, không cho phép nhấn nút
                             : () async {
-                          if (_formKey.currentState!.validate()) {
-                            setState(() {
-                              isLoadingSystem = true; // Đang tải, bật loading
-                            });
-                            await _loginUser(); // Thực hiện đăng nhập
-                            setState(() {
-                              isLoadingSystem = false; // Đăng nhập xong, tắt loading
-                            });
-                          }
-                        },
+                                if (_formKey.currentState!.validate()) {
+                                  setState(() {
+                                    isLoadingSystem =
+                                        true; // Đang tải, bật loading
+                                  });
+                                  await _loginUser(); // Thực hiện đăng nhập
+                                  setState(() {
+                                    isLoadingSystem =
+                                        false; // Đăng nhập xong, tắt loading
+                                  });
+                                }
+                              },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF4285F4),
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -245,16 +253,17 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         ),
                         child: isLoadingSystem
                             ? const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                        )
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
                             : const Text(
-                          'Đăng nhập',
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                                'Đăng nhập',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                       const SizedBox(height: 16),
                       TextButton(
@@ -281,49 +290,52 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         onTap: isLoadingGoogle
                             ? null
                             : () async {
-                          setState(() {
-                            isLoadingGoogle = true;
-                          });
-                          await _loginWithGoogle();
-                          setState(() {
-                            isLoadingGoogle = false;
-                          });
-                        },
+                                setState(() {
+                                  isLoadingGoogle = true;
+                                });
+                                await _loginWithGoogle();
+                                setState(() {
+                                  isLoadingGoogle = false;
+                                });
+                              },
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.grey.shade300),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
-                          alignment: Alignment.center, // Đảm bảo vòng tròn nằm giữa
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 24),
+                          alignment: Alignment.center,
+                          // Đảm bảo vòng tròn nằm giữa
                           child: isLoadingGoogle
                               ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                            ),
-                          )
+                                  width: 24,
+                                  height: 24,
+                                  child: CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.blue),
+                                  ),
+                                )
                               : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'images/logo_google.png',
-                                width: 20,
-                                height: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "Đăng nhập với Google",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Image.asset(
+                                      'images/logo_google.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const Text(
+                                      "Đăng nhập với Google",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
                         ),
                       ),
                     ],
@@ -378,13 +390,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       ),
     );
   }
+
   Widget _buildPassField({
     required String label,
     required TextEditingController controller,
     required TextInputType keyboardType,
     bool obscureText = false,
   }) {
-
     bool _isObscure = obscureText;
 
     return StatefulBuilder(
@@ -418,16 +430,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   ),
                   suffixIcon: obscureText
                       ? IconButton(
-                    icon: Icon(
-                      _isObscure ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isObscure = !_isObscure;
-                      });
-                    },
-                  )
+                          icon: Icon(
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () {
+                                _isObscure = !_isObscure;
+                              },
+                            );
+                          },
+                        )
                       : null,
                 ),
                 validator: (value) {

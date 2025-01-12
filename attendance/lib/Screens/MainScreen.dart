@@ -18,8 +18,8 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     HomeScreen(),
     EventScreen(),
-    LeaveScreen(),
     QrScreen(),
+    LeaveScreen(),
     AccountScreen(),
   ];
 
