@@ -1,3 +1,4 @@
+import 'package:attendance/Account/ChangePasswordScreen.dart';
 import 'package:attendance/Account/EditInfoScreen.dart';
 import 'package:attendance/Account/LoginScreen.dart';
 import 'package:attendance/Screens/HistoryScreen.dart';
@@ -76,6 +77,13 @@ class AccountScreen extends StatelessWidget {
                   context,
                   icon: Icons.lock,
                   label: 'Đổi mật khẩu',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ChangePasswordScreen(),
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(height: 10),
                 _buildMenuItem(
@@ -105,7 +113,7 @@ class AccountScreen extends StatelessWidget {
                   textColor: Colors.red,
                   onTap: () async {
                     SharedPreferences prefs =
-                    await SharedPreferences.getInstance();
+                        await SharedPreferences.getInstance();
                     prefs.setBool('isLoggedIn', false);
 
                     Navigator.pushReplacement(
@@ -124,10 +132,10 @@ class AccountScreen extends StatelessWidget {
 
   Widget _buildMenuItem(BuildContext context,
       {required IconData icon,
-        required String label,
-        Color iconColor = Colors.black,
-        Color textColor = Colors.black,
-        VoidCallback? onTap}) {
+      required String label,
+      Color iconColor = Colors.black,
+      Color textColor = Colors.black,
+      VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: iconColor),
       title: Text(
