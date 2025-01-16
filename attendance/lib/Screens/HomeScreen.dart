@@ -1,8 +1,9 @@
+import 'package:attendance/Screens/DetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -57,13 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
     },
     {
       'className': 'Toán rời rạc',
-      'time': '10:00 - 12:00',
+      'time': '10:00 - 11:30',
       'date': DateTime(2024, 11, 12),
       'status': 'Chưa điểm danh',
       'repeat': 'daily',
       'location': 'Phòng E505',
       'organizer': 'Hoàng Thị E',
-      'endDate': DateTime(2024, 12, 31),
+      'endDate': DateTime(2025, 12, 10),
     },
     {
       'className': 'Xác suất thống kê',
@@ -120,25 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       for (final dayOfWeek in item['daysOfWeek']) {
         final eventDate = item['date'];
-        final eventDay = eventDate.weekday;
-
-        final daysUntilNextEventDay =
-            (dayOfWeek.weekday - now.weekday + 7) % 7;
-        if (daysUntilNextEventDay > 0) {
-          final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
-          if (nextEventDay.isAfter(now)) {
-            return true;
-          }
+        final daysUntilNextEventDay = (dayOfWeek.weekday - now.weekday + 7) % 7;
+        final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
+        if (nextEventDay.isAfter(now) && nextEventDay.isBefore(item['endDate'])) {
+          return true;
         }
       }
       return false;
     } else if (item['repeat'] == 'daily') {
-      if(item['endDate'] != null && now.isAfter(item['endDate'])){
+      if (item['endDate'] != null && now.isAfter(item['endDate'])) {
         return false;
       }
-      return true;
-    }else {
-      return true;
+      return item['date'].isAfter(now);
+    } else {
+      return item['date'].isAfter(now);
     }
   }
 
@@ -153,14 +149,12 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       return item['daysOfWeek']
           .any((element) => element.weekday == now.weekday);
-    }else if(item['repeat'] == 'daily'){
-      if(item['endDate'] != null && now.isAfter(item['endDate'])){
+    } else if (item['repeat'] == 'daily') {
+      if (item['endDate'] != null && now.isAfter(item['endDate'])) {
         return false;
       }
-      return  item['date'].isAtSameMomentAs(now) ||
-          (item['date'].isBefore(now) &&
-              now.difference(item['date']) < const Duration(days: 1));
-    }else {
+      return now.isAfter(item['date']) || now.isAtSameMomentAs(item['date']);
+    } else {
       return item['date'].isAtSameMomentAs(now) ||
           (item['date'].isBefore(now) &&
               now.difference(item['date']) < const Duration(days: 1));
@@ -168,30 +162,27 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   bool isEventCompleted(Map<String, dynamic> item, DateTime now) {
-    if(item['repeat'] == null){
+    if (item['repeat'] == null) {
       return item['date'].isBefore(now);
-    }else if (item['repeat'] == 'weekly') {
+    } else if (item['repeat'] == 'weekly') {
       if (item['endDate'] != null && now.isAfter(item['endDate'])) {
         return true;
       }
-      for(final dayOfWeek in item['daysOfWeek']){
+      for (final dayOfWeek in item['daysOfWeek']) {
         final eventDate = item['date'];
-        final eventDay = eventDate.weekday;
         final daysUntilNextEventDay = (dayOfWeek.weekday - now.weekday + 7) % 7;
-        if(daysUntilNextEventDay > 0){
-          final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
-          if(nextEventDay.isBefore(now)){
-            return true;
-          }
+        final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
+        if (nextEventDay.isBefore(now) || nextEventDay.isAfter(item['endDate'])) {
+          return true;
         }
       }
       return false;
-    }else if(item['repeat'] == 'daily'){
-      if(item['endDate'] != null && now.isAfter(item['endDate'])){
+    } else if (item['repeat'] == 'daily') {
+      if (item['endDate'] != null && now.isAfter(item['endDate'])) {
         return true;
       }
       return item['date'].isBefore(now);
-    }else{
+    } else {
       return item['date'].isBefore(now);
     }
   }
@@ -221,9 +212,9 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Thống kê hôm nay',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -237,18 +228,20 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: ListView(
-                  children: getFilteredAttendanceData().map((item) {
-                    return buildAttendanceCard(
-                      className: item['className'],
-                      time: item['time'],
-                      date: item['repeat'] == null
-                          ? DateFormat('dd/MM/yyyy').format(item['date'])
-                          : formatRepeatedEventDate(item),
-                      status: selectedTab == 0 ? '' : item['status'],
-                      location: item['location'],
-                      organizer: item['organizer'],
-                    );
-                  }).toList()),
+                children: getFilteredAttendanceData().map((item) {
+                  return buildAttendanceCard(
+                    itemData: item,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailScreen(eventData: item),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ),
@@ -394,101 +387,102 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildAttendanceCard({
-    required String className,
-    required String time,
-    required String date,
-    required String status,
-    required String location,
-    required String organizer,
+    required Map<String, dynamic> itemData,
+    required VoidCallback onTap,
   }) {
-    return Card(
-      elevation: 2,
-      color: Colors.blue[50],
-      margin: const EdgeInsets.only(bottom: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              className,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(
-                  time,
-                  style: const TextStyle(color: Colors.black87),
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 2,
+        color: Colors.blue[50],
+        margin: const EdgeInsets.only(bottom: 16.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                itemData['className'],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
-                const Spacer(),
-                if (status.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: status == 'Đã điểm danh' ? Colors.green[100]
-                          : (status == 'Vắng' ? Colors.red[100]
-                          : Colors.orange[100]),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    child:  Text(
-                      status,
-                      style: TextStyle(
-                        color: status == 'Đã điểm danh'
-                            ? Colors.green[900]
-                            : (status == 'Vắng' ? Colors.red[900] : Colors.orange[900]),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Text(
+                    itemData['time'],
+                    style: const TextStyle(color: Colors.black87),
+                  ),
+                  const Spacer(),
+                  if (selectedTab != 0 && itemData['status'].isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: itemData['status'] == 'Đã điểm danh' ? Colors.green[100]
+                            : (itemData['status'] == 'Vắng' ? Colors.red[100]
+                            : Colors.orange[100]),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child:  Text(
+                        itemData['status'],
+                        style: TextStyle(
+                          color: itemData['status'] == 'Đã điểm danh'
+                              ? Colors.green[900]
+                              : (itemData['status'] == 'Vắng' ? Colors.red[900] : Colors.orange[900]),
+                        ),
                       ),
                     ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.calendar_today, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(
-                  date,
-                  style: const TextStyle(color: Colors.black87),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    location,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.calendar_today, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Text(
+                    itemData['repeat'] == null
+                        ? DateFormat('dd/MM/yyyy').format(itemData['date'])
+                        : formatRepeatedEventDate(itemData),
                     style: const TextStyle(color: Colors.black87),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.person, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    organizer,
-                    style: const TextStyle(color: Colors.black87),
-                    overflow: TextOverflow.ellipsis,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(Icons.location_on, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      itemData['location'],
+                      style: const TextStyle(color: Colors.black87),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.person, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      itemData['organizer'],
+                      style: const TextStyle(color: Colors.black87),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

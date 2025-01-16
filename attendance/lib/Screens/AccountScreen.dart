@@ -1,5 +1,6 @@
 import 'package:attendance/Account/EditInfoScreen.dart';
 import 'package:attendance/Account/LoginScreen.dart';
+import 'package:attendance/Screens/HistoryScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,68 +24,39 @@ class AccountScreen extends StatelessWidget {
       body: Column(
         children: [
           Container(
-            child: Container(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+            margin: EdgeInsets.only(top: 30),
+            child: const Column(
+              children: [
+                CircleAvatar(
+                  radius: 70,
+                  backgroundImage: AssetImage('images/avatar.png'),
                 ),
-              ),
-              margin: EdgeInsets.only(top: 30),
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 70,
-                        backgroundImage: AssetImage('images/avatar.png'),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: CircleAvatar(
-                          radius: 15,
-                          backgroundColor: Colors.blue,
-                          child: Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
-                      ),
-                    ],
+                SizedBox(height: 10),
+                Text(
+                  'Trần Thế Luật',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Trần Thế Luật',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                Text(
+                  'trantheluat@gmail.com',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    'trantheluat@gmail.com',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
-              ),
+                ),
+                SizedBox(height: 40),
+              ],
             ),
           ),
           Container(
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(
-                Radius.circular(20),
-              ),
-              color: Color(0xFFE9F2FE),
-            ),
             margin: EdgeInsets.all(20),
             padding: EdgeInsets.all(15),
+            decoration: BoxDecoration(
+              color: Color(0xFFE9F2FE),
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Column(
               children: [
                 _buildMenuItem(
@@ -92,10 +64,10 @@ class AccountScreen extends StatelessWidget {
                   icon: Icons.edit,
                   label: 'Chỉnh sửa thông tin',
                   onTap: () {
-                    Navigator.pushReplacement(
-                      context,
+                    Navigator.of(context).push(
                       MaterialPageRoute(
-                          builder: (context) => EditInfoScreen()),
+                        builder: (context) => EditInfoScreen(),
+                      ),
                     );
                   },
                 ),
@@ -104,8 +76,18 @@ class AccountScreen extends StatelessWidget {
                   context,
                   icon: Icons.lock,
                   label: 'Đổi mật khẩu',
+                ),
+                SizedBox(height: 10),
+                _buildMenuItem(
+                  context,
+                  icon: Icons.history,
+                  label: 'Lịch sử điểm danh',
                   onTap: () {
-                    // Bạn có thể thêm logic cho việc đổi mật khẩu ở đây
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => HistoryScreen(),
+                      ),
+                    );
                   },
                 ),
                 SizedBox(height: 10),
@@ -113,9 +95,6 @@ class AccountScreen extends StatelessWidget {
                   context,
                   icon: Icons.language,
                   label: 'Ngôn ngữ',
-                  onTap: () {
-                    // Bạn có thể thêm logic cho việc thay đổi ngôn ngữ ở đây
-                  },
                 ),
                 SizedBox(height: 10),
                 _buildMenuItem(
@@ -125,11 +104,10 @@ class AccountScreen extends StatelessWidget {
                   iconColor: Colors.red,
                   textColor: Colors.red,
                   onTap: () async {
-                    // Xóa trạng thái đăng nhập trong SharedPreferences
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
-                    prefs.setBool('isLoggedIn', false); // Đánh dấu là chưa đăng nhập
+                    SharedPreferences prefs =
+                    await SharedPreferences.getInstance();
+                    prefs.setBool('isLoggedIn', false);
 
-                    // Điều hướng về màn hình đăng nhập
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(builder: (context) => LoginScreen()),

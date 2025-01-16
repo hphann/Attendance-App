@@ -1,5 +1,7 @@
+import 'package:attendance/Screens/HistoryScreen.dart';
+import 'package:attendance/Screens/HomeScreen.dart';
 import 'package:attendance/Screens/MainScreen.dart';
-import 'package:attendance/screens/detail_screen.dart';
+import 'package:attendance/screens/DetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';

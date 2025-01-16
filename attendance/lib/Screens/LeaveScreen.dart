@@ -450,51 +450,51 @@ class _LeaveScreenState extends State<LeaveScreen> {
     );
   }
 
-  Widget _buildDropdownMenu({
-    required List<String> items,
-    required void Function(String?) onItemSelected,
-    required GlobalKey key,
-  }) {
-    final renderBox = key.currentContext!.findRenderObject() as RenderBox;
-    final size = renderBox.size;
-    final offset = renderBox.localToGlobal(Offset.zero);
-    return Positioned(
-      left: offset.dx,
-      top: offset.dy + size.height,
-      child: Container(
-        constraints:
-            BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 32),
-        child: Material(
-          elevation: 4.0,
-          borderRadius: BorderRadius.circular(8),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Container(
-              width: size.width,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  final item = items[index];
-                  return ListTile(
-                    title: Text(
-                      item,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onTap: () {
-                      onItemSelected(item);
-                      _removeDropdownOverlay();
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  // Widget _buildDropdownMenu({
+  //   required List<String> items,
+  //   required void Function(String?) onItemSelected,
+  //   required GlobalKey key,
+  // }) {
+  //   final renderBox = key.currentContext!.findRenderObject() as RenderBox;
+  //   final size = renderBox.size;
+  //   final offset = renderBox.localToGlobal(Offset.zero);
+  //   return Positioned(
+  //     left: offset.dx,
+  //     top: offset.dy + size.height,
+  //     child: Container(
+  //       constraints:
+  //           BoxConstraints(maxWidth: MediaQuery.of(context).size.width - 32),
+  //       child: Material(
+  //         elevation: 4.0,
+  //         borderRadius: BorderRadius.circular(8),
+  //         child: SingleChildScrollView(
+  //           scrollDirection: Axis.horizontal,
+  //           child: Container(
+  //             width: size.width,
+  //             child: ListView.builder(
+  //               shrinkWrap: true,
+  //               itemCount: items.length,
+  //               itemBuilder: (context, index) {
+  //                 final item = items[index];
+  //                 return ListTile(
+  //                   title: Text(
+  //                     item,
+  //                     maxLines: 1,
+  //                     overflow: TextOverflow.ellipsis,
+  //                   ),
+  //                   onTap: () {
+  //                     onItemSelected(item);
+  //                     _removeDropdownOverlay();
+  //                   },
+  //                 );
+  //               },
+  //             ),
+  //           ),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   // Hàm để tạo OverlayEntry
   OverlayEntry _createDropdownOverlay({
