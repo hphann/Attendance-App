@@ -422,11 +422,7 @@ class _LoginScreenState extends State<LoginScreen>
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.grey, width: 1),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                    borderSide: BorderSide.none,
                   ),
                   suffixIcon: obscureText
                       ? IconButton(
