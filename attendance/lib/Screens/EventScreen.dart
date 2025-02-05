@@ -26,9 +26,33 @@ class _EventScreenState extends State<EventScreen> {
     },
     {
       'className': 'Workshop Flutter',
-      'time': '13:00 - 17:00',
+      'time': '07:00 - 10:00',
       'date': DateTime(2025, 01, 08),
       'location': 'Phòng C',
+    },
+    {
+      'className': 'Lịch sử đảng',
+      'time': '13:00 - 15:00',
+      'date': DateTime(2025, 02, 12),
+      'location': 'Phòng 207',
+    },
+    {
+      'className': 'Xác xuất thống kê',
+      'time': '18:00 - 20:00',
+      'date': DateTime(2025, 01, 30),
+      'location': 'Phòng 402',
+    },
+    {
+      'className': 'Kỹ năng giao tiếp',
+      'time': '13:00 - 17:00',
+      'date': DateTime(2025, 02, 17),
+      'location': 'Phòng 905',
+    },
+    {
+      'className': 'Chiến lược đầu tư',
+      'time': '17:00 - 20:00',
+      'date': DateTime(2025, 01, 27),
+      'location': 'Phòng 605',
     },
   ];
 
@@ -127,9 +151,9 @@ class _EventScreenState extends State<EventScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('Sắp tới', '5'),
-              _buildStatItem('Đang diễn ra', '2'),
-              _buildStatItem('Đã kết thúc', '3'),
+              _buildStatItem('Sắp tới', '3'),
+              _buildStatItem('Đang diễn ra', '1'),
+              _buildStatItem('Đã kết thúc', '4'),
             ],
           ),
         ],

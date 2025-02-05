@@ -90,7 +90,7 @@ class _DetailScreenState extends State<DetailScreen> {
       ],
       'location': 'Phòng D404',
       'organizer': 'Phạm Văn D',
-      'endDate': DateTime(2025, 01, 30),
+      'endDate': DateTime(2025, 12, 30),
     },
     {
       'className': 'Toán rời rạc',
@@ -272,7 +272,8 @@ class _DetailScreenState extends State<DetailScreen> {
               const SizedBox(height: 20),
               buildTabs(),
               const SizedBox(height: 20),
-              Flexible(
+              SizedBox(
+                height: 300,
                 child: ListView(
                     children: getFilteredAttendanceData().map((item) {
                       return buildAttendanceCard(
