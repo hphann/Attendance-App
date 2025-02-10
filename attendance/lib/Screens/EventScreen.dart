@@ -1,3 +1,4 @@
+import 'package:attendance/Screens/EventDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -30,30 +31,6 @@ class _EventScreenState extends State<EventScreen> {
       'date': DateTime(2025, 01, 08),
       'location': 'Phòng C',
     },
-    {
-      'className': 'Lịch sử đảng',
-      'time': '13:00 - 15:00',
-      'date': DateTime(2025, 02, 12),
-      'location': 'Phòng 207',
-    },
-    {
-      'className': 'Xác xuất thống kê',
-      'time': '18:00 - 20:00',
-      'date': DateTime(2025, 01, 30),
-      'location': 'Phòng 402',
-    },
-    {
-      'className': 'Kỹ năng giao tiếp',
-      'time': '13:00 - 17:00',
-      'date': DateTime(2025, 02, 17),
-      'location': 'Phòng 905',
-    },
-    {
-      'className': 'Chiến lược đầu tư',
-      'time': '17:00 - 20:00',
-      'date': DateTime(2025, 01, 27),
-      'location': 'Phòng 605',
-    },
   ];
 
   List<Map<String, dynamic>> _getFilteredEventData() {
@@ -83,16 +60,11 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredEvents = _getFilteredEventData();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Ứng dụng Điểm danh',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        title: const Text('Ứng dụng Điểm danh', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -105,15 +77,27 @@ class _EventScreenState extends State<EventScreen> {
             _buildTabs(),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView(
-                children: _getFilteredEventData().map((event) {
-                  return _buildEventCard(
-                    className: event['className'],
-                    time: event['time'],
-                    date: DateFormat('dd/MM/yyyy').format(event['date']),
-                    location: event['location'],
+              child: ListView.builder(
+                itemCount: filteredEvents.length,
+                itemBuilder: (context, index) {
+                  final event = filteredEvents[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => EventDetail(eventData: event),
+                        ),
+                      );
+                    },
+                    child: _buildEventCard(
+                      className: event['className'],
+                      time: event['time'],
+                      date: DateFormat('dd/MM/yyyy').format(event['date']),
+                      location: event['location'],
+                    ),
                   );
-                }).toList(),
+                },
               ),
             ),
           ],
@@ -132,26 +116,16 @@ class _EventScreenState extends State<EventScreen> {
   Widget _buildStatsSection() {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(12),
-      ),
+      decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Thống kê sự kiện',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          const Text('Thống kê sự kiện', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('Sắp tới', '3'),
+              _buildStatItem('Sắp tới', _getFilteredEventData().length.toString()),
               _buildStatItem('Đang diễn ra', '1'),
               _buildStatItem('Đã kết thúc', '4'),
             ],
@@ -164,22 +138,9 @@ class _EventScreenState extends State<EventScreen> {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
       ],
     );
   }
@@ -204,16 +165,11 @@ class _EventScreenState extends State<EventScreen> {
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey,
-          ),
+          border: Border.all(color: isSelected ? Colors.blue : Colors.grey),
         ),
         child: Text(
           title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w500,
-          ),
+          style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -235,13 +191,7 @@ class _EventScreenState extends State<EventScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              className,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            Text(className, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -263,9 +213,7 @@ class _EventScreenState extends State<EventScreen> {
               children: [
                 const Icon(Icons.location_on, size: 16, color: Colors.black54),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(location),
-                ),
+                Expanded(child: Text(location)),
               ],
             ),
           ],

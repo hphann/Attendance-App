@@ -1,8 +1,8 @@
-import 'package:attendance/Attendance/QrScanner.dart';
+import 'package:attendance/Attendance/QrGenerator.dart';
 import 'package:flutter/material.dart';
 
-class AttendanceMethodsSheet extends StatelessWidget {
-  const AttendanceMethodsSheet({Key? key}) : super(key: key);
+class AttendanceMethodsSheet2 extends StatelessWidget {
+  const AttendanceMethodsSheet2({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +26,16 @@ class AttendanceMethodsSheet extends StatelessWidget {
           const SizedBox(height: 24),
           _buildMethodButton(
             icon: Icons.qr_code_scanner,
-            label: 'Quét QR',
+            label: 'QR',
             onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => QrScanner(),
+              showModalBottomSheet(
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
+                builder: (context) {
+                  return _buildTimeSelectionSheet(context);
+                },
               );
             },
           ),
@@ -90,4 +94,35 @@ class AttendanceMethodsSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _buildTimeSelectionSheet(BuildContext context) {
+  final List<int> timeOptions = [5, 10, 15, 20, 30, 45, 60];
+
+  return Container(
+    padding: EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("Chọn thời gian điểm danh", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        SizedBox(height: 12),
+        ...timeOptions.map((minutes) => ListTile(
+          title: Text("$minutes phút"),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => QrGenerator(initialExpireMinutes: minutes),
+              ),
+            );
+          },
+        )),
+      ],
+    ),
+  );
 }

@@ -399,51 +399,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
-  Widget _buildAttendanceHistory() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Lịch sử điểm danh',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: const Text(
-                'Xem tất cả',
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        const AttendanceHistoryCard(
-          date: 'Buổi 3 - 06/12/2024',
-          time: 'Không có',
-          status: AttendanceStatus.absent,
-        ),
-        const SizedBox(height: 12),
-        const AttendanceHistoryCard(
-          date: 'Buổi 2 - 29/11/2024',
-          time: '09:45 AM',
-          status: AttendanceStatus.late,
-        ),
-        const SizedBox(height: 12),
-        const AttendanceHistoryCard(
-          date: 'Buổi 1 - 22/11/2024',
-          time: '09:05 AM',
-          status: AttendanceStatus.present,
-        ),
-      ],
-    );
-  }
-
   Widget buildAttendanceCard({
     required String className,
     required String time,

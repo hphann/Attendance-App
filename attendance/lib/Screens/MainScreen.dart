@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'LeaveScreen.dart';
 import 'AccountScreen.dart';
-import 'QrScreen.dart';
+import '../Attendance/QrScanner.dart';
 import 'EventScreen.dart';
 import 'HomeScreen.dart';
 
@@ -26,7 +26,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     HomeScreen(),
     EventScreen(),
-    QrScreen(),
+    QrScanner(),
     LeaveScreen(),
     AccountScreen(),
   ];

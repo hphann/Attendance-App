@@ -1,3 +1,5 @@
+import 'package:attendance/Attendance/QrGenerator.dart';
+import 'package:attendance/Attendance/QrScanner.dart';
 import 'package:attendance/Screens/HistoryScreen.dart';
 import 'package:attendance/Screens/HomeScreen.dart';
 import 'package:attendance/Screens/MainScreen.dart';
