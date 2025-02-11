@@ -4,6 +4,7 @@ import 'AccountScreen.dart';
 import '../Attendance/QrScanner.dart';
 import 'EventScreen.dart';
 import 'HomeScreen.dart';
+import 'dart:async';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

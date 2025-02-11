@@ -109,7 +109,7 @@ class _LoginScreenState extends State<LoginScreen>
       }
 
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen>
 
       // Đăng nhập vào Firebase
       final UserCredential userCredential =
-          await FirebaseAuth.instance.signInWithCredential(credential);
+      await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Kiểm tra xem thông tin người dùng đã tồn tại trong Firestore chưa
       final userDoc = await FirebaseFirestore.instance
@@ -164,99 +164,106 @@ class _LoginScreenState extends State<LoginScreen>
       backgroundColor: const Color(0xFF4285F4),
       resizeToAvoidBottomInset: true,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SlideTransition(
-                position: _slideAnimation,
-                child: Container(
-                  height: MediaQuery.of(context).size.height * 0.4,
-                  padding: const EdgeInsets.only(bottom: 10, left: 40),
-                  alignment: Alignment.bottomLeft,
-                  child: const Text(
-                    'Xin chào',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints viewportConstraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: viewportConstraints.maxHeight,
                 ),
-              ),
-              Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8F0FE),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                padding: const EdgeInsets.all(18),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const SizedBox(height: 20),
-                      _buildTextField(
-                        label: 'Email',
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      _buildPassField(
-                        label: 'Mật khẩu',
-                        controller: _passwordController,
-                        keyboardType: TextInputType.text,
-                        obscureText: true,
-                      ),
-                      Align(
-                        alignment: Alignment.topRight,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ForgotPasswordScreen()),
-                            );
-                          },
-                          child: Text(
-                            'Quên mật khẩu?',
-                            style: TextStyle(
-                              color: Colors.blue[800],
-                            ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: Container(
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        padding: const EdgeInsets.only(bottom: 10, left: 40),
+                        alignment: Alignment.bottomLeft,
+                        child: const Text(
+                          'Xin chào',
+                          style: TextStyle(
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: isLoadingSystem
-                            ? null // Nếu đang tải, không cho phép nhấn nút
-                            : () async {
+                    ),
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8F0FE),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(30),
+                          topRight: Radius.circular(30),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(18),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 20),
+                            _buildTextField(
+                              label: 'Email',
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                            ),
+                            _buildPassField(
+                              label: 'Mật khẩu',
+                              controller: _passwordController,
+                              keyboardType: TextInputType.text,
+                              obscureText: true,
+                            ),
+                            Align(
+                              alignment: Alignment.topRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ForgotPasswordScreen()),
+                                  );
+                                },
+                                child: Text(
+                                  'Quên mật khẩu?',
+                                  style: TextStyle(
+                                    color: Colors.blue[800],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            ElevatedButton(
+                              onPressed: isLoadingSystem
+                                  ? null // Nếu đang tải, không cho phép nhấn nút
+                                  : () async {
                                 if (_formKey.currentState!.validate()) {
                                   setState(() {
                                     isLoadingSystem =
-                                        true; // Đang tải, bật loading
+                                    true; // Đang tải, bật loading
                                   });
                                   await _loginUser(); // Thực hiện đăng nhập
                                   setState(() {
                                     isLoadingSystem =
-                                        false; // Đăng nhập xong, tắt loading
+                                    false; // Đăng nhập xong, tắt loading
                                   });
                                 }
                               },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF4285F4),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: isLoadingSystem
-                            ? const CircularProgressIndicator(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF4285F4),
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: isLoadingSystem
+                                  ? const CircularProgressIndicator(
                                 valueColor:
-                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                                AlwaysStoppedAnimation<Color>(Colors.white),
                               )
-                            : const Text(
+                                  : const Text(
                                 'Đăng nhập',
                                 style: TextStyle(
                                   fontSize: 20,
@@ -264,32 +271,32 @@ class _LoginScreenState extends State<LoginScreen>
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SignUpScreen()),
-                          );
-                        },
-                        child: Text(
-                          'Tạo tài khoản',
-                          style: TextStyle(color: Colors.blue[800]),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Hoặc',
-                        style: TextStyle(color: Colors.black54, fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: isLoadingGoogle
-                            ? null
-                            : () async {
+                            ),
+                            const SizedBox(height: 16),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignUpScreen()),
+                                );
+                              },
+                              child: Text(
+                                'Tạo tài khoản',
+                                style: TextStyle(color: Colors.blue[800]),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Hoặc',
+                              style: TextStyle(color: Colors.black54, fontSize: 16),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 8),
+                            GestureDetector(
+                              onTap: isLoadingGoogle
+                                  ? null
+                                  : () async {
                                 setState(() {
                                   isLoadingGoogle = true;
                                 });
@@ -298,18 +305,18 @@ class _LoginScreenState extends State<LoginScreen>
                                   isLoadingGoogle = false;
                                 });
                               },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 12, horizontal: 24),
-                          alignment: Alignment.center,
-                          // Đảm bảo vòng tròn nằm giữa
-                          child: isLoadingGoogle
-                              ? const SizedBox(
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(color: Colors.grey.shade300),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 12, horizontal: 24),
+                                alignment: Alignment.center,
+                                // Đảm bảo vòng tròn nằm giữa
+                                child: isLoadingGoogle
+                                    ? const SizedBox(
                                   width: 24,
                                   height: 24,
                                   child: CircularProgressIndicator(
@@ -317,7 +324,7 @@ class _LoginScreenState extends State<LoginScreen>
                                         Colors.blue),
                                   ),
                                 )
-                              : Row(
+                                    : Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Image.asset(
@@ -336,14 +343,17 @@ class _LoginScreenState extends State<LoginScreen>
                                     ),
                                   ],
                                 ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -426,20 +436,20 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                   suffixIcon: obscureText
                       ? IconButton(
-                          icon: Icon(
-                            _isObscure
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(
-                              () {
-                                _isObscure = !_isObscure;
-                              },
-                            );
-                          },
-                        )
+                    icon: Icon(
+                      _isObscure
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(
+                            () {
+                          _isObscure = !_isObscure;
+                        },
+                      );
+                    },
+                  )
                       : null,
                 ),
                 validator: (value) {
