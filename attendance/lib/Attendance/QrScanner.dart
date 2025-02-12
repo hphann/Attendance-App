@@ -4,7 +4,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
-import 'dart:io'; // Import để dùng Platform.environment
+import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QrScanner extends StatefulWidget {
   const QrScanner({Key? key}) : super(key: key);
@@ -37,7 +38,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     _apiUrl = Platform.environment['API_URL'];
 
     // Sử dụng URL mặc định nếu biến môi trường không được thiết lập
-    _apiUrl ??= 'http://10.0.2.2:3000/api/qr/scan';
+    _apiUrl ??= 'https://back-end-attendance.onrender.com/api/qr/scan';
     print('API URL: $_apiUrl'); // In URL API để kiểm tra
   }
 
@@ -75,11 +76,14 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     return result.isGranted;
   }
 
+  Future<String?> getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userId'); // Lấy userId
+  }
+
   Future<void> _onScan(String qrData) async {
     if (qrData.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mã QR không hợp lệ!')),
-      );
+      _showDialog('Lỗi', 'Mã QR không hợp lệ!');
       return;
     }
 
@@ -89,12 +93,29 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     });
 
     try {
+      // Lấy userId từ SharedPreferences
+      String? userId = await getUserId();
+      if (userId == null) {
+        _showDialog('Lỗi', 'Chưa đăng nhập, vui lòng đăng nhập lại!');
+        return;
+      }
+
+      // Kiểm tra qrData có phải là một chuỗi JSON hợp lệ không
+      try {
+        final decodedData = jsonDecode(qrData);
+        // Nếu QR chứa dữ liệu hợp lệ, tiếp tục gửi yêu cầu
+      } catch (e) {
+        _showDialog('Lỗi', 'Dữ liệu mã QR không hợp lệ!');
+        return;
+      }
+
       // Sử dụng URL API từ biến môi trường
       final response = await http.post(
         Uri.parse(_apiUrl!), // Sử dụng URL API đã được khẳng định không null
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'qrData': qrData,
+          'user_id': userId, // Sử dụng userId đã lấy từ SharedPreferences
           'note': _noteController.text,
         }),
       );
@@ -104,27 +125,46 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       });
 
       if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Điểm danh thành công!')),
-        );
+        _showDialog('Điểm danh thành công!', 'Bạn đã điểm danh thành công!');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: ${response.statusCode}')),
-        );
+        final responseBody = jsonDecode(response.body);
+        _showDialog('Lỗi', 'Lỗi: ${responseBody['message']}');
       }
     } catch (error) {
       setState(() {
         _isProcessing = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không thể kết nối đến server! $error')),
-      );
+      _showDialog('Lỗi', 'Không thể kết nối đến server! $error');
     } finally {
       if (scannerController != null) {
         await scannerController?.start();
       }
     }
   }
+
+// Hàm hiển thị AlertDialog
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Đóng AlertDialog
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {

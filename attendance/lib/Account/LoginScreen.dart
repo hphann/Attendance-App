@@ -71,6 +71,7 @@ class _LoginScreenState extends State<LoginScreen>
       // Lưu trạng thái đăng nhập vào SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setBool('isLoggedIn', true);
+      prefs.setString('userId', userCredential.user!.uid);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đăng nhập thành công!')),
@@ -129,6 +130,7 @@ class _LoginScreenState extends State<LoginScreen>
       // Lưu trạng thái đăng nhập vào SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setBool('isLoggedIn', true);
+      prefs.setString('userId', userCredential.user!.uid);
 
       if (userDoc.exists) {
         // Người dùng đã có thông tin trong Firestore, chuyển đến HomeScreen

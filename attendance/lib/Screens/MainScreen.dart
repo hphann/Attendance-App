@@ -33,9 +33,12 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
+    if (_currentIndex != index) {
+      setState(() {
+        _currentIndex = index;
+      });
+      _navigatorKeys[_currentIndex].currentState?.popUntil((route) => route.isFirst);
+    }
   }
 
   @override

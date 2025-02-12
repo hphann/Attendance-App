@@ -19,8 +19,8 @@ class QrGenerator extends StatefulWidget {
 class _QrGeneratorState extends State<QrGenerator> {
   late int expireMinutes;
 
-  static const String apiUrl = "http://10.0.2.2:3000/api/qr/generate";
-  static const String eventId = "EVENT123";
+  static const String apiUrl = "https://back-end-attendance.onrender.com/api/qr/generate";
+  static const String eventId = "rabPeQSPolmwCVzPDsWF";
 
   Uint8List? qrImage;
   DateTime? expireTime;
@@ -40,12 +40,21 @@ class _QrGeneratorState extends State<QrGenerator> {
       isLoading = true;
     });
 
+    String sessionTime = DateTime.now().toIso8601String();
+
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"event_id": eventId, "valid_minutes": expireMinutes}),
+        body: jsonEncode({
+          "event_id": eventId,
+          "valid_minutes": expireMinutes,
+          "session_time": sessionTime, // Đảm bảo session_time có giá trị hợp lệ
+        }),
       );
+
+      print("Mã trạng thái trả về: ${response.statusCode}");
+      print("Dữ liệu trả về: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -58,6 +67,7 @@ class _QrGeneratorState extends State<QrGenerator> {
         showSnackBar("Lỗi tạo mã QR!");
       }
     } catch (error) {
+      print("Lỗi khi gọi API: $error");
       showSnackBar("Không thể kết nối đến server!");
     } finally {
       setState(() {
@@ -65,6 +75,7 @@ class _QrGeneratorState extends State<QrGenerator> {
       });
     }
   }
+
 
   String _getBase64Data(String base64String) {
     if (base64String.contains(",")) {

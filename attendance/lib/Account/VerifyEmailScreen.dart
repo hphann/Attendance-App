@@ -33,7 +33,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<bool> verifyCode(String email, String code) async {
-    final url = Uri.parse('https://attendance-l8q6.onrender.com/api/auth/verify-code');
+    final url = Uri.parse('https://back-end-attendance.onrender.com/api/auth/verify-code');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -52,7 +52,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<bool> sendResetEmail(String email) async {
-    final url = Uri.parse('https://attendance-l8q6.onrender.com/api/auth/forgot-password');
+    final url = Uri.parse('https://back-end-attendance.onrender.com/api/auth/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
