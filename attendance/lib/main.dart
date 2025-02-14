@@ -1,9 +1,4 @@
-import 'package:attendance/Attendance/QrGenerator.dart';
-import 'package:attendance/Attendance/QrScanner.dart';
-import 'package:attendance/Screens/HistoryScreen.dart';
-import 'package:attendance/Screens/HomeScreen.dart';
 import 'package:attendance/Screens/MainScreen.dart';
-import 'package:attendance/screens/DetailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +9,7 @@ import 'package:lottie/lottie.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  await initializeDateFormatting('vi_VN', null); // Sử dụng tiếng Việt
+  await initializeDateFormatting('vi_VN', null); 
   runApp(MyApp());
 }
 
@@ -26,19 +21,21 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: SplashScreen(),
+      home: const SplashScreen(),
     );
   }
 }
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  // Đường dẫn animation
-  static const String _loadingLottieUrl = 'animation/attendance.json';
+
+  static const String _loadingLottieUrl = 'assets/animation/attendance.json';
 
   @override
   void initState() {
@@ -47,18 +44,18 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToNextScreen() async {
-    await Future.delayed(Duration(seconds: 2)); // Mô phỏng thời gian tải
+    await Future.delayed(const Duration(seconds: 2));
     bool isLoggedIn = await _checkLoginStatus();
 
     if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     }
   }
@@ -74,8 +71,8 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: Lottie.asset(
           _loadingLottieUrl,
-          width: 200, // Điều chỉnh kích thước
-          height: 200, // Điều chỉnh kích thước
+          width: 200, 
+          height: 200,
           fit: BoxFit.cover,
         ),
       ),

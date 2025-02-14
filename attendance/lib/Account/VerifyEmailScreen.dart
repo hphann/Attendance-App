@@ -33,7 +33,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<bool> verifyCode(String email, String code) async {
-    final url = Uri.parse('https://attendance-7f16.onrender.com/api/auth/verify-code');
+    final url =
+        Uri.parse('https://attendance-7f16.onrender.com/api/auth/verify-code');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -52,7 +53,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<bool> sendResetEmail(String email) async {
-    final url = Uri.parse('https://attendance-7f16.onrender.com/api/auth/forgot-password');
+    final url = Uri.parse(
+        'https://attendance-7f16.onrender.com/api/auth/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -119,10 +121,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       ),
                       padding: EdgeInsets.only(top: 50, bottom: 30),
                       child: Lottie.asset(
-                        'animation/email.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                        'assets/animation/email.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
                         width: 250,
                         height: 250,
-                        repeat: true,  // Nếu muốn lặp lại animation
+                        repeat: true, // Nếu muốn lặp lại animation
                       ),
                     ),
                   ),
@@ -236,12 +238,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,
-
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.grey, width: 1),
               ),
-
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.blue, width: 2),

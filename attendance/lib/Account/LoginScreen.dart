@@ -110,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen>
       }
 
       final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+          await googleUser.authentication;
 
       final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -119,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen>
 
       // Đăng nhập vào Firebase
       final UserCredential userCredential =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       // Kiểm tra xem thông tin người dùng đã tồn tại trong Firestore chưa
       final userDoc = await FirebaseFirestore.instance
@@ -225,7 +225,8 @@ class _LoginScreenState extends State<LoginScreen>
                                   Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => ForgotPasswordScreen()),
+                                        builder: (context) =>
+                                            ForgotPasswordScreen()),
                                   );
                                 },
                                 child: Text(
@@ -241,38 +242,39 @@ class _LoginScreenState extends State<LoginScreen>
                               onPressed: isLoadingSystem
                                   ? null // Nếu đang tải, không cho phép nhấn nút
                                   : () async {
-                                if (_formKey.currentState!.validate()) {
-                                  setState(() {
-                                    isLoadingSystem =
-                                    true; // Đang tải, bật loading
-                                  });
-                                  await _loginUser(); // Thực hiện đăng nhập
-                                  setState(() {
-                                    isLoadingSystem =
-                                    false; // Đăng nhập xong, tắt loading
-                                  });
-                                }
-                              },
+                                      if (_formKey.currentState!.validate()) {
+                                        setState(() {
+                                          isLoadingSystem =
+                                              true; // Đang tải, bật loading
+                                        });
+                                        await _loginUser(); // Thực hiện đăng nhập
+                                        setState(() {
+                                          isLoadingSystem =
+                                              false; // Đăng nhập xong, tắt loading
+                                        });
+                                      }
+                                    },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF4285F4),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
                               child: isLoadingSystem
                                   ? const CircularProgressIndicator(
-                                valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                              )
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
+                                    )
                                   : const Text(
-                                'Đăng nhập',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                                      'Đăng nhập',
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                             ),
                             const SizedBox(height: 16),
                             TextButton(
@@ -291,7 +293,8 @@ class _LoginScreenState extends State<LoginScreen>
                             const SizedBox(height: 8),
                             const Text(
                               'Hoặc',
-                              style: TextStyle(color: Colors.black54, fontSize: 16),
+                              style: TextStyle(
+                                  color: Colors.black54, fontSize: 16),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
@@ -299,19 +302,20 @@ class _LoginScreenState extends State<LoginScreen>
                               onTap: isLoadingGoogle
                                   ? null
                                   : () async {
-                                setState(() {
-                                  isLoadingGoogle = true;
-                                });
-                                await _loginWithGoogle();
-                                setState(() {
-                                  isLoadingGoogle = false;
-                                });
-                              },
+                                      setState(() {
+                                        isLoadingGoogle = true;
+                                      });
+                                      await _loginWithGoogle();
+                                      setState(() {
+                                        isLoadingGoogle = false;
+                                      });
+                                    },
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: Colors.grey.shade300),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 12, horizontal: 24),
@@ -319,32 +323,34 @@ class _LoginScreenState extends State<LoginScreen>
                                 // Đảm bảo vòng tròn nằm giữa
                                 child: isLoadingGoogle
                                     ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.blue),
-                                  ),
-                                )
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                  Colors.blue),
+                                        ),
+                                      )
                                     : Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Image.asset(
-                                      'images/logo_google.png',
-                                      width: 20,
-                                      height: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const Text(
-                                      "Đăng nhập với Google",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/logo_google.png',
+                                            width: 20,
+                                            height: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            "Đăng nhập với Google",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
                               ),
                             ),
                           ],
@@ -438,20 +444,20 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                   suffixIcon: obscureText
                       ? IconButton(
-                    icon: Icon(
-                      _isObscure
-                          ? Icons.visibility_off
-                          : Icons.visibility,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(
-                            () {
-                          _isObscure = !_isObscure;
-                        },
-                      );
-                    },
-                  )
+                          icon: Icon(
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            setState(
+                              () {
+                                _isObscure = !_isObscure;
+                              },
+                            );
+                          },
+                        )
                       : null,
                 ),
                 validator: (value) {

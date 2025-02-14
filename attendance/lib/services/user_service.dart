@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 class UserService {
   final Dio _dio = Dio();
-  final String baseUrl = 'http://localhost:3000/api';
+  final String baseUrl = 'https://attendance-7f16.onrender.com/api';
 
   Future<Map<String, dynamic>> getUsers({int page = 1, int limit = 10}) async {
     try {
@@ -106,6 +106,18 @@ class UserService {
       return response.data;
     } catch (e) {
       throw Exception('Lỗi khi xuất danh sách: ${e.toString()}');
+    }
+  }
+
+  Future<User> getUserProfile(String id) async {
+    try {
+      final response = await _dio.get('$baseUrl/users/profile/$id');
+      if (response.data['success']) {
+        return User.fromJson(response.data['data']);
+      }
+      throw Exception(response.data['message']);
+    } catch (e) {
+      throw Exception('Lỗi khi lấy thông tin người dùng: ${e.toString()}');
     }
   }
 }

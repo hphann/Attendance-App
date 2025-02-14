@@ -6,7 +6,7 @@ import 'package:attendance/models/attendance.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key}); // Bỏ tham số userId
+  const HistoryScreen({super.key});
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -56,7 +56,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
       if (storedUserId == null) {
         // Nếu không có userId, có thể chuyển về màn hình đăng nhập
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+          );
         }
         return;
       }
