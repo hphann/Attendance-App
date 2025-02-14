@@ -89,9 +89,9 @@ class _AccountScreenState extends State<AccountScreen> {
                           ),
                           const SizedBox(height: 10),
                           Text(
-                            _user?.email ?? 'Người dùng',
+                            _user?.name ?? 'Người dùng',
                             style: const TextStyle(
-                              fontSize: 24, 
+                              fontSize: 24,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -119,13 +119,15 @@ class _AccountScreenState extends State<AccountScreen> {
                             context,
                             icon: Icons.edit,
                             label: 'Chỉnh sửa thông tin',
-                            onTap: () {
-                              Navigator.of(context).push(
+                            onTap: () async {
+                              final result = await Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => EditInfoScreen(),
+                                  builder: (context) => const EditInfoScreen(),
                                 ),
                               );
-                              _loadUserData();
+                              if (result == true) {
+                                await _loadUserData();
+                              }
                             },
                           ),
                           const SizedBox(height: 10),
@@ -133,12 +135,16 @@ class _AccountScreenState extends State<AccountScreen> {
                             context,
                             icon: Icons.lock,
                             label: 'Đổi mật khẩu',
-                            onTap: () {
-                              Navigator.of(context).push(
+                            onTap: () async {
+                              final result = await Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (context) => ChangePasswordScreen(),
+                                  builder: (context) =>
+                                      const ChangePasswordScreen(),
                                 ),
                               );
+                              if (result == true) {
+                                await _loadUserData();
+                              }
                             },
                           ),
                           const SizedBox(height: 10),
@@ -146,12 +152,15 @@ class _AccountScreenState extends State<AccountScreen> {
                             context,
                             icon: Icons.history,
                             label: 'Lịch sử điểm danh',
-                            onTap: () {
-                              Navigator.of(context).push(
+                            onTap: () async {
+                              final result = await Navigator.of(context).push(
                                 MaterialPageRoute(
                                   builder: (context) => HistoryScreen(),
                                 ),
                               );
+                              if (result == true) {
+                                await _loadUserData();
+                              }
                             },
                           ),
                           const SizedBox(height: 10),
@@ -159,9 +168,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             context,
                             icon: Icons.language,
                             label: 'Ngôn ngữ',
-                            onTap: () {
-
-                            },
+                            onTap: () async {},
                           ),
                           const SizedBox(height: 10),
                           _buildMenuItem(

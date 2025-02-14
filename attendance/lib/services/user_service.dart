@@ -120,4 +120,31 @@ class UserService {
       throw Exception('Lỗi khi lấy thông tin người dùng: ${e.toString()}');
     }
   }
+
+  Future<void> changePassword(
+      String userId, String currentPassword, String newPassword) async {
+    try {
+      final response = await _dio.post(
+        '$baseUrl/users/change-password/$userId',
+        data: {
+          'currentPassword': currentPassword,
+          'newPassword': newPassword,
+        },
+      );
+
+      if (!response.data['success']) {
+        throw Exception(response.data['message']);
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.statusCode == 400) {
+          throw Exception('Mật khẩu hiện tại không chính xác');
+        } else if (e.response?.data != null) {
+          throw Exception(
+              e.response?.data['message'] ?? 'Lỗi khi đổi mật khẩu');
+        }
+      }
+      throw Exception('Lỗi khi đổi mật khẩu: ${e.toString()}');
+    }
+  }
 }
