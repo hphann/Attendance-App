@@ -1,6 +1,8 @@
+import 'package:attendance/widgets/attendance_history_card.dart';
 import 'package:attendance/widgets/attendance_methods_sheet_2.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:attendance/widgets/add_member_bottom_sheet.dart';
+import 'package:attendance/screens/event_leave_requests_screen.dart';
 
 class EventDetail extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -21,6 +23,36 @@ class _EventDetailState extends State<EventDetail> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) => const AttendanceMethodsSheet2(),
+    );
+  }
+
+  void _showAddMemberBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: AddMemberBottomSheet(
+          onMembersAdded: (List<String> newMembers) {
+            // TODO: Implement add members to event
+            setState(() {
+              final currentMembers = (widget.eventData['members']
+                      as List<Map<String, dynamic>>?) ??
+                  [];
+              widget.eventData['members'] = [
+                ...currentMembers,
+                ...newMembers.map((email) =>
+                    {'email': email, 'status': 'notYet', 'role': 'Thành viên'})
+              ];
+            });
+          },
+        ),
+      ),
     );
   }
 
@@ -63,12 +95,15 @@ class _EventDetailState extends State<EventDetail> {
               ),
               const SizedBox(height: 24),
               _buildInfoRow('Thời gian:', widget.eventData['time']),
-              _buildInfoRow('Số người tham gia:', '29 thành viên'),
+              _buildInfoRow(
+                'Số người tham gia:',
+                '${(widget.eventData['members'] as List)?.length ?? 0} thành viên',
+              ),
               _buildInfoRow('Địa điểm:', widget.eventData['location']),
               const SizedBox(height: 20),
               _buildActionButtons(context),
               const SizedBox(height: 20),
-
+              _buildMemberList(),
             ],
           ),
         ),
@@ -126,7 +161,16 @@ class _EventDetailState extends State<EventDetail> {
         ),
         Expanded(
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EventLeaveRequestsScreen(
+                    eventData: widget.eventData,
+                  ),
+                ),
+              );
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.blue),
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -139,5 +183,135 @@ class _EventDetailState extends State<EventDetail> {
         ),
       ],
     );
+  }
+
+  Widget _buildMemberList() {
+    final members = widget.eventData['members'] as List<Map<String, dynamic>>?;
+
+    if (members == null || members.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(height: 32),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              'Danh sách thành viên',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: _showAddMemberBottomSheet,
+              icon: const Icon(Icons.person_add, size: 20, color: Colors.white),
+              label: const Text('Thêm'),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: members.length,
+          separatorBuilder: (context, index) => const Divider(height: 1),
+          itemBuilder: (context, index) {
+            final member = members[index];
+            final status = member['status'] ?? 'notYet';
+
+            return ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.blue.shade50,
+                child: Text(
+                  member['email'][0].toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              title: Text(
+                member['email'],
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(
+                member['role'] ?? 'Thành viên',
+                style: TextStyle(color: Colors.grey[600], fontSize: 13),
+              ),
+              trailing: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(_getAttendanceStatus(status))
+                      .withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: _getStatusColor(_getAttendanceStatus(status))
+                        .withOpacity(0.5),
+                    width: 1,
+                  ),
+                ),
+                child: Text(
+                  _getStatusText(_getAttendanceStatus(status)),
+                  style: TextStyle(
+                    color: _getStatusColor(_getAttendanceStatus(status)),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              contentPadding: EdgeInsets.zero,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Color _getStatusColor(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.notYet:
+        return Colors.orange;
+      case AttendanceStatus.present:
+        return Colors.green;
+      case AttendanceStatus.absent:
+        return Colors.red;
+      case AttendanceStatus.late:
+        return Colors.yellow;
+    }
+  }
+
+  String _getStatusText(AttendanceStatus status) {
+    switch (status) {
+      case AttendanceStatus.notYet:
+        return 'Chưa điểm danh';
+      case AttendanceStatus.present:
+        return 'Có mặt';
+      case AttendanceStatus.absent:
+        return 'Vắng mặt';
+      case AttendanceStatus.late:
+        return 'Trễ';
+    }
+  }
+
+  AttendanceStatus _getAttendanceStatus(String status) {
+    switch (status) {
+      case 'present':
+        return AttendanceStatus.present;
+      case 'late':
+        return AttendanceStatus.late;
+      case 'absent':
+        return AttendanceStatus.absent;
+      default:
+        return AttendanceStatus.notYet;
+    }
   }
 }

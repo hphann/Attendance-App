@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-enum AttendanceStatus { present, late, absent }
+enum AttendanceStatus { present, late, absent, notYet }
 
 class AttendanceHistoryCard extends StatelessWidget {
   final String date;
@@ -91,6 +91,11 @@ class AttendanceHistoryCard extends StatelessWidget {
         backgroundColor = Colors.red;
         textColor = Colors.white;
         text = 'Vắng';
+        break;
+      case AttendanceStatus.notYet:
+        backgroundColor = Colors.orange;
+        textColor = Colors.white;
+        text = 'Chưa điểm danh';
         break;
     }
 

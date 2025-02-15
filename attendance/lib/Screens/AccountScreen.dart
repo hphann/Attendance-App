@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
 import 'package:attendance/models/user.dart';
 import 'package:attendance/services/user_service.dart';
+import 'package:provider/provider.dart';
+import 'package:attendance/providers/user_provider.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -16,45 +18,12 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  final UserService _userService = UserService();
-  User? _user;
-  bool _isLoading = true;
-  String? _error;
-
   @override
   void initState() {
     super.initState();
-    _loadUserData();
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getString('userId');
-
-      if (userId == null) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
-        return;
-      }
-
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-
-      final response = await _userService.getUserProfile(userId);
-      setState(() {
-        _user = response;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<UserProvider>().loadUserProfile();
+    });
   }
 
   @override
@@ -71,121 +40,132 @@ class _AccountScreenState extends State<AccountScreen> {
         ),
         backgroundColor: Colors.blue,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _error != null
-              ? Center(child: Text('Lỗi: $_error'))
-              : Column(
+      body: Consumer<UserProvider>(
+        builder: (context, userProvider, child) {
+          if (userProvider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (userProvider.error != null) {
+            return Center(child: Text('Lỗi: ${userProvider.error}'));
+          }
+          final user = userProvider.user;
+          if (user == null) {
+            return const Center(child: Text('Không có dữ liệu người dùng'));
+          }
+
+          return Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 30),
+                child: Column(
                   children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 30),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 70,
-                            backgroundImage: _user?.avatarUrl != null
-                                ? NetworkImage(_user!.avatarUrl!)
-                                : const AssetImage('assets/images/avatar.png'),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            _user?.name ?? 'Người dùng',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            _user?.email ?? 'Không có email',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey,
-                            ),
-                          ),
-                          const SizedBox(height: 40),
-                        ],
+                    CircleAvatar(
+                      radius: 70,
+                      backgroundImage: user.avatarUrl != null
+                          ? NetworkImage(user.avatarUrl!)
+                          : const AssetImage('assets/images/avatar.png')
+                              as ImageProvider,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      user.name,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Container(
-                      margin: const EdgeInsets.all(20),
-                      padding: const EdgeInsets.all(15),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE9F2FE),
-                        borderRadius: BorderRadius.circular(20),
+                    Text(
+                      user.email,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
                       ),
-                      child: Column(
-                        children: [
-                          _buildMenuItem(
-                            context,
-                            icon: Icons.edit,
-                            label: 'Chỉnh sửa thông tin',
-                            onTap: () async {
-                              final result = await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const EditInfoScreen(),
-                                ),
-                              );
-                              if (result == true) {
-                                await _loadUserData();
-                              }
-                            },
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE9F2FE),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  children: [
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.edit,
+                      label: 'Chỉnh sửa thông tin',
+                      onTap: () async {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const EditInfoScreen(),
                           ),
-                          const SizedBox(height: 10),
-                          _buildMenuItem(
-                            context,
-                            icon: Icons.lock,
-                            label: 'Đổi mật khẩu',
-                            onTap: () async {
-                              final result = await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ChangePasswordScreen(),
-                                ),
-                              );
-                              if (result == true) {
-                                await _loadUserData();
-                              }
-                            },
+                        );
+                        if (result == true) {
+                          context.read<UserProvider>().loadUserProfile();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.lock,
+                      label: 'Đổi mật khẩu',
+                      onTap: () async {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const ChangePasswordScreen(),
                           ),
-                          const SizedBox(height: 10),
-                          _buildMenuItem(
-                            context,
-                            icon: Icons.history,
-                            label: 'Lịch sử điểm danh',
-                            onTap: () async {
-                              final result = await Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => HistoryScreen(),
-                                ),
-                              );
-                              if (result == true) {
-                                await _loadUserData();
-                              }
-                            },
+                        );
+                        if (result == true) {
+                          context.read<UserProvider>().loadUserProfile();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.history,
+                      label: 'Lịch sử điểm danh',
+                      onTap: () async {
+                        final result = await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => HistoryScreen(),
                           ),
-                          const SizedBox(height: 10),
-                          _buildMenuItem(
-                            context,
-                            icon: Icons.language,
-                            label: 'Ngôn ngữ',
-                            onTap: () async {},
-                          ),
-                          const SizedBox(height: 10),
-                          _buildMenuItem(
-                            context,
-                            icon: Icons.logout,
-                            label: 'Đăng xuất',
-                            iconColor: Colors.red,
-                            textColor: Colors.red,
-                            onTap: () {
-                              _showLogoutConfirmationDialog(context);
-                            },
-                          ),
-                        ],
-                      ),
+                        );
+                        if (result == true) {
+                          context.read<UserProvider>().loadUserProfile();
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.language,
+                      label: 'Ngôn ngữ',
+                      onTap: () async {},
+                    ),
+                    const SizedBox(height: 10),
+                    _buildMenuItem(
+                      context,
+                      icon: Icons.logout,
+                      label: 'Đăng xuất',
+                      iconColor: Colors.red,
+                      textColor: Colors.red,
+                      onTap: () {
+                        _showLogoutConfirmationDialog(context);
+                      },
                     ),
                   ],
                 ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 

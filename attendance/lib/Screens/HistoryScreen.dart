@@ -348,7 +348,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       'location':
                                           attendance.eventInfo?['location'] ??
                                               'Không có địa điểm',
-                                      'organizer': attendance.userName,
+                                      'organizer':
+                                          attendance.eventInfo?['organizer'] ??
+                                              'Không có thông tin',
                                     },
                                     onTap: () => _showDetailDialog(attendance),
                                   );

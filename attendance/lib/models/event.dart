@@ -7,8 +7,8 @@ class Event {
   final String type;
   final String location;
   final String createdBy;
-  final DateTime createdAt;
-  String status;
+  // final DateTime createdAt;
+  // String status;
   final String? repeat;
   final List<String>? daysOfWeek;
   final String? time;
@@ -22,8 +22,8 @@ class Event {
     required this.type,
     required this.location,
     required this.createdBy,
-    required this.createdAt,
-    required this.status,
+    // required this.createdAt,
+    // required this.status,
     this.repeat,
     this.daysOfWeek,
     this.time,
@@ -91,8 +91,8 @@ class Event {
       type: json['type'] ?? 'event',
       location: json['location'] ?? '',
       createdBy: json['createdBy'] ?? '',
-      createdAt: parseDate(json['createdAt']),
-      status: json['status'] ?? 'active',
+      // createdAt: parseDate(json['createdAt']),
+      // status: json['status'] ?? 'active',
       repeat: json['repeat'],
       daysOfWeek: json['daysOfWeek'] != null
           ? List<String>.from(json['daysOfWeek'])
@@ -100,7 +100,7 @@ class Event {
       time: json['time'],
     );
 
-    event.status = event.getStatus();
+    // event.status = event.getStatus();
 
     return event;
   }
@@ -113,7 +113,7 @@ class Event {
         'type': type,
         'location': location,
         'createdBy': createdBy,
-        'status': status,
+        // 'status': status,
         'repeat': repeat,
         'daysOfWeek': daysOfWeek,
         'time': time,

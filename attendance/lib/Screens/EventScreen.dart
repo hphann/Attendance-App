@@ -1,4 +1,5 @@
 import 'package:attendance/Screens/EventDetail.dart';
+import 'package:attendance/Screens/create_event_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -18,6 +19,11 @@ class _EventScreenState extends State<EventScreen> {
       'time': '09:00 - 12:00',
       'date': DateTime(2025, 01, 15),
       'location': 'Hội trường A',
+      'members': [
+        {'email': 'member1@example.com', 'status': 'notYet'},
+        {'email': 'member2@example.com', 'status': 'present'},
+        {'email': 'member3@example.com', 'status': 'absent'},
+      ],
     },
     {
       'className': 'Họp nhóm dự án',
@@ -46,7 +52,9 @@ class _EventScreenState extends State<EventScreen> {
               eventDate.day == now.day;
         }).toList();
       case 2: // Đã kết thúc
-        return _eventData.where((event) => event['date'].isBefore(now)).toList();
+        return _eventData
+            .where((event) => event['date'].isBefore(now))
+            .toList();
       default:
         return _eventData;
     }
@@ -64,7 +72,11 @@ class _EventScreenState extends State<EventScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ứng dụng Điểm danh', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+        title: const Text('Ứng dụng Điểm danh',
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white)),
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -95,6 +107,7 @@ class _EventScreenState extends State<EventScreen> {
                       time: event['time'],
                       date: DateFormat('dd/MM/yyyy').format(event['date']),
                       location: event['location'],
+                      members: event['members']?.cast<Map<String, dynamic>>(),
                     ),
                   );
                 },
@@ -105,7 +118,12 @@ class _EventScreenState extends State<EventScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Thêm sự kiện
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const CreateEventScreen(),
+            ),
+          );
         },
         child: const Icon(Icons.add, color: Colors.white),
         backgroundColor: Colors.blue,
@@ -116,16 +134,22 @@ class _EventScreenState extends State<EventScreen> {
   Widget _buildStatsSection() {
     return Container(
       padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(color: Colors.blue, borderRadius: BorderRadius.circular(12)),
+      decoration: BoxDecoration(
+          color: Colors.blue, borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Thống kê sự kiện', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text('Thống kê sự kiện',
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem('Sắp tới', _getFilteredEventData().length.toString()),
+              _buildStatItem(
+                  'Sắp tới', _getFilteredEventData().length.toString()),
               _buildStatItem('Đang diễn ra', '1'),
               _buildStatItem('Đã kết thúc', '4'),
             ],
@@ -138,7 +162,11 @@ class _EventScreenState extends State<EventScreen> {
   Widget _buildStatItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold)),
         const SizedBox(height: 8),
         Text(label, style: const TextStyle(color: Colors.white, fontSize: 14)),
       ],
@@ -169,7 +197,9 @@ class _EventScreenState extends State<EventScreen> {
         ),
         child: Text(
           title,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black87, fontWeight: FontWeight.w500),
+          style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.w500),
         ),
       ),
     );
@@ -180,6 +210,7 @@ class _EventScreenState extends State<EventScreen> {
     required String time,
     required String date,
     required String location,
+    List<Map<String, dynamic>>? members,
   }) {
     return Card(
       elevation: 2,
@@ -191,7 +222,9 @@ class _EventScreenState extends State<EventScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(className, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(className,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -203,7 +236,8 @@ class _EventScreenState extends State<EventScreen> {
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 16, color: Colors.black54),
+                const Icon(Icons.calendar_today,
+                    size: 16, color: Colors.black54),
                 const SizedBox(width: 8),
                 Text(date),
               ],
@@ -216,6 +250,16 @@ class _EventScreenState extends State<EventScreen> {
                 Expanded(child: Text(location)),
               ],
             ),
+            if (members != null && members.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.people, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Text('${members.length} thành viên'),
+                ],
+              ),
+            ],
           ],
         ),
       ),

@@ -5,7 +5,7 @@ class Attendance {
   final String status; // present, late, absent
   final DateTime timestamp;
   final String? note;
-  final String userName;
+  // final String userName;
   final Map<String, dynamic>? eventInfo; // Thêm thông tin sự kiện
 
   Attendance({
@@ -15,7 +15,7 @@ class Attendance {
     required this.status,
     required this.timestamp,
     this.note,
-    required this.userName,
+    // required this.userName,
     this.eventInfo,
   });
 
@@ -49,7 +49,7 @@ class Attendance {
       status: json['status'],
       timestamp: parseTimestamp(json['timestamp']),
       note: json['note'],
-      userName: json['userName'] ?? '',
+      // userName: json['userName'] ?? '',
       eventInfo: json['eventInfo'],
     );
   }
@@ -60,6 +60,6 @@ class Attendance {
         'status': status,
         'timestamp': timestamp.toIso8601String(),
         'note': note,
-        'userName': userName,
+        // 'userName': userName,
       };
 }

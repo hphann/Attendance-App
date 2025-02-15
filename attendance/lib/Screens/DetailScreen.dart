@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/widgets/attendance_history_card.dart';
 import 'package:attendance/widgets/attendance_methods_sheet.dart';
+import 'package:attendance/screens/absence_registration_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -29,21 +30,35 @@ class _DetailScreenState extends State<DetailScreen> {
     final now = DateTime.now();
     switch (selectedTab) {
       case 0: // Sắp tới
-        return [_attendanceData
-            .firstWhere((item) => item['className'] == widget.eventData['className'] && isEventUpcoming(item,now),
-            orElse: () => {} )].whereType<Map<String, dynamic>>().toList();
+        return [
+          _attendanceData.firstWhere(
+              (item) =>
+                  item['className'] == widget.eventData['className'] &&
+                  isEventUpcoming(item, now),
+              orElse: () => {})
+        ].whereType<Map<String, dynamic>>().toList();
       case 1: // Đang diễn ra
-        return [_attendanceData
-            .firstWhere((item) => item['className'] == widget.eventData['className'] && isEventOngoing(item,now),
-            orElse: () => {} )].whereType<Map<String, dynamic>>().toList();
+        return [
+          _attendanceData.firstWhere(
+              (item) =>
+                  item['className'] == widget.eventData['className'] &&
+                  isEventOngoing(item, now),
+              orElse: () => {})
+        ].whereType<Map<String, dynamic>>().toList();
       case 2: // Đã kết thúc
-        return [_attendanceData
-            .firstWhere((item) => item['className'] == widget.eventData['className'] && isEventCompleted(item,now),
-            orElse: () => {} )].whereType<Map<String, dynamic>>().toList();
+        return [
+          _attendanceData.firstWhere(
+              (item) =>
+                  item['className'] == widget.eventData['className'] &&
+                  isEventCompleted(item, now),
+              orElse: () => {})
+        ].whereType<Map<String, dynamic>>().toList();
       default:
-        return [_attendanceData
-            .firstWhere((item) => item['className'] == widget.eventData['className'],
-            orElse: () => {} )].whereType<Map<String, dynamic>>().toList();
+        return [
+          _attendanceData.firstWhere(
+              (item) => item['className'] == widget.eventData['className'],
+              orElse: () => {})
+        ].whereType<Map<String, dynamic>>().toList();
     }
   }
 
@@ -86,7 +101,8 @@ class _DetailScreenState extends State<DetailScreen> {
       'repeat': 'weekly',
       'daysOfWeek': [
         DateTime(2024, 1, 1, 0, 0, 0).add(Duration(days: DateTime.monday - 1)),
-        DateTime(2024, 1, 1, 0, 0, 0).add(Duration(days: DateTime.wednesday - 1))
+        DateTime(2024, 1, 1, 0, 0, 0)
+            .add(Duration(days: DateTime.wednesday - 1))
       ],
       'location': 'Phòng D404',
       'organizer': 'Phạm Văn D',
@@ -114,7 +130,7 @@ class _DetailScreenState extends State<DetailScreen> {
       ],
       'location': 'Phòng F606',
       'organizer': 'Ngô Văn F',
-      'endDate':  DateTime(2025, 12, 20),
+      'endDate': DateTime(2025, 12, 20),
     },
     {
       'className': 'Mạng máy tính',
@@ -139,7 +155,8 @@ class _DetailScreenState extends State<DetailScreen> {
         final eventDate = item['date'];
         final daysUntilNextEventDay = (dayOfWeek.weekday - now.weekday + 7) % 7;
         final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
-        if (nextEventDay.isAfter(now) && nextEventDay.isBefore(item['endDate'])) {
+        if (nextEventDay.isAfter(now) &&
+            nextEventDay.isBefore(item['endDate'])) {
           return true;
         }
       }
@@ -188,7 +205,8 @@ class _DetailScreenState extends State<DetailScreen> {
         final eventDate = item['date'];
         final daysUntilNextEventDay = (dayOfWeek.weekday - now.weekday + 7) % 7;
         final nextEventDay = now.add(Duration(days: daysUntilNextEventDay));
-        if (nextEventDay.isBefore(now) || nextEventDay.isAfter(item['endDate'])) {
+        if (nextEventDay.isBefore(now) ||
+            nextEventDay.isAfter(item['endDate'])) {
           return true;
         }
       }
@@ -202,7 +220,6 @@ class _DetailScreenState extends State<DetailScreen> {
       return item['date'].isBefore(now);
     }
   }
-
 
   void _onTabSelected(int index) {
     setState(() {
@@ -276,17 +293,17 @@ class _DetailScreenState extends State<DetailScreen> {
                 height: 300,
                 child: ListView(
                     children: getFilteredAttendanceData().map((item) {
-                      return buildAttendanceCard(
-                        className: item['className'],
-                        time: item['time'],
-                        date: item['repeat'] == null
-                            ? DateFormat('dd/MM/yyyy').format(item['date'])
-                            : formatRepeatedEventDate(item),
-                        status: selectedTab == 0 ? '' : item['status'],
-                        location: item['location'],
-                        organizer: item['organizer'],
-                      );
-                    }).toList()),
+                  return buildAttendanceCard(
+                    className: item['className'],
+                    time: item['time'],
+                    date: item['repeat'] == null
+                        ? DateFormat('dd/MM/yyyy').format(item['date'])
+                        : formatRepeatedEventDate(item),
+                    status: selectedTab == 0 ? '' : item['status'],
+                    location: item['location'],
+                    organizer: item['organizer'],
+                  );
+                }).toList()),
               ),
             ],
           ),
@@ -340,12 +357,19 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
           ),
         ),
-        const SizedBox(
-          width: 12,
-        ),
+        const SizedBox(width: 12),
         Expanded(
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => AbsenceRegistrationScreen(
+                    eventData: widget.eventData,
+                  ),
+                ),
+              );
+            },
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.blue),
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -437,19 +461,24 @@ class _DetailScreenState extends State<DetailScreen> {
                 const Spacer(),
                 if (status.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: status == 'Đã điểm danh' ? Colors.green[100]
-                          : (status == 'Vắng' ? Colors.red[100]
-                          : Colors.orange[100]),
+                      color: status == 'Đã điểm danh'
+                          ? Colors.green[100]
+                          : (status == 'Vắng'
+                              ? Colors.red[100]
+                              : Colors.orange[100]),
                       borderRadius: BorderRadius.circular(5),
                     ),
-                    child:  Text(
+                    child: Text(
                       status,
                       style: TextStyle(
                         color: status == 'Đã điểm danh'
                             ? Colors.green[900]
-                            : (status == 'Vắng' ? Colors.red[900] : Colors.orange[900]),
+                            : (status == 'Vắng'
+                                ? Colors.red[900]
+                                : Colors.orange[900]),
                       ),
                     ),
                   ),

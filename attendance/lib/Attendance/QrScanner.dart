@@ -42,12 +42,12 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     print('API URL: $_apiUrl'); // In URL API để kiểm tra
   }
 
-
   Future<void> _initializeScanner() async {
     bool granted = await _getCameraPermission();
     if (!granted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cần quyền truy cập camera để quét mã QR')),
+        const SnackBar(
+            content: Text('Cần quyền truy cập camera để quét mã QR')),
       );
       return;
     }
@@ -171,14 +171,14 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     }
   }
 
-
 // Hàm hiển thị AlertDialog
   void _showDialog(String title, String content, Color color, IconData icon) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -214,10 +214,6 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       },
     );
   }
-
-
-
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -268,18 +264,20 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
                   borderRadius: BorderRadius.circular(10.0),
                   child: _isInitialized && scannerController != null
                       ? MobileScanner(
-                    controller: scannerController,
-                    onDetect: (barcodeCapture) {
-                      if (barcodeCapture.barcodes.isNotEmpty && !_isProcessing) {
-                        final String? qrCode = barcodeCapture.barcodes.first.rawValue;
-                        if (qrCode != null) {
-                          scannerController?.stop();
-                          _onScan(qrCode);
-                        }
-                      }
-                    },
-                    fit: BoxFit.cover,
-                  )
+                          controller: scannerController,
+                          onDetect: (barcodeCapture) {
+                            if (barcodeCapture.barcodes.isNotEmpty &&
+                                !_isProcessing) {
+                              final String? qrCode =
+                                  barcodeCapture.barcodes.first.rawValue;
+                              if (qrCode != null) {
+                                scannerController?.stop();
+                                _onScan(qrCode);
+                              }
+                            }
+                          },
+                          fit: BoxFit.cover,
+                        )
                       : Center(child: CircularProgressIndicator()),
                 ),
               ),

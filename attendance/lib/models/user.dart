@@ -9,8 +9,8 @@ class User {
   final bool disabled;
   final String? role;
   final String? avatarUrl;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  // final DateTime? createdAt;
+  // final DateTime? updatedAt;
 
   User({
     this.id,
@@ -21,8 +21,8 @@ class User {
     this.disabled = false,
     this.role,
     this.avatarUrl,
-    this.createdAt,
-    this.updatedAt,
+    // this.createdAt,
+    // this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -44,8 +44,8 @@ class User {
       disabled: json['disabled'] ?? false,
       role: json['role']?.toString(),
       avatarUrl: json['avatarUrl']?.toString(),
-      createdAt: parseDateTimeFromJson(json['createdAt']),
-      updatedAt: parseDateTimeFromJson(json['updatedAt']),
+      // createdAt: parseDateTimeFromJson(json['createdAt']),
+      // updatedAt: parseDateTimeFromJson(json['updatedAt']),
     );
   }
 
