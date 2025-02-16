@@ -31,7 +31,7 @@ class _QrGeneratorState extends State<QrGenerator> {
   @override
   void initState() {
     super.initState();
-    expireMinutes = widget.initialExpireMinutes;  // Gán giá trị ban đầu cho expireMinutes
+    expireMinutes = widget.initialExpireMinutes;
     generateQR();
   }
 
@@ -49,7 +49,7 @@ class _QrGeneratorState extends State<QrGenerator> {
         body: jsonEncode({
           "event_id": eventId,
           "valid_minutes": expireMinutes,
-          "session_time": sessionTime, // Đảm bảo session_time có giá trị hợp lệ
+          "session_time": sessionTime,
         }),
       );
 
