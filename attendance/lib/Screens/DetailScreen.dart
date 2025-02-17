@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/widgets/attendance_history_card.dart';
-import 'package:attendance/widgets/attendance_methods_sheet.dart';
+import 'package:attendance/Attendance/attendance_methods_check_in.dart';
 import 'package:attendance/screens/absence_registration_screen.dart';
 
 class DetailScreen extends StatefulWidget {

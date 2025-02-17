@@ -20,7 +20,7 @@ class _QrGeneratorState extends State<QrGenerator> {
   late int expireMinutes;
 
   static const String apiUrl = "https://attendance-7f16.onrender.com/api/qr/generate";
-  static const String eventId = "rabPeQSPolmwCVzPDsWF";
+  static const String eventId = "6R3nnNmZ7RpF0qf42OiW";
 
   Uint8List? qrImage;
   DateTime? expireTime;
