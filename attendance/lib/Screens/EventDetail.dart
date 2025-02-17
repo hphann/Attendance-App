@@ -1,5 +1,5 @@
 import 'package:attendance/widgets/attendance_history_card.dart';
-import 'package:attendance/Attendance/attendance_methods_create.dart';
+import 'package:attendance/widgets/attendance_methods_sheet_2.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance/widgets/add_member_bottom_sheet.dart';
 import 'package:attendance/screens/event_leave_requests_screen.dart';
@@ -102,7 +102,6 @@ class _EventDetailState extends State<EventDetail> {
               _buildInfoRow('Địa điểm:', widget.eventData['location']),
               const SizedBox(height: 20),
               _buildActionButtons(context),
-
               const SizedBox(height: 20),
               _buildMemberList(),
             ],

@@ -22,7 +22,7 @@ class GpsService {
 
       if (sessionId == null || sessionId.isEmpty) {
         // Người dùng không nhập session ID
-        DialogService.showErrorDialog(context, "Lỗi", "Bạn cần nhập Session ID.");
+        DialogService.showErrorDialog(context, "Lỗi", "Bạn cần nhập mã điểm danh.");
         return;
       }
 
