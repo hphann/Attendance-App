@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:attendance/models/event.dart';
+import 'package:attendance/models/absence_request.dart';
+import 'package:attendance/providers/absence_request_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class EventLeaveRequestsScreen extends StatefulWidget {
-  final Map<String, dynamic> eventData;
+  final Event event;
 
-  const EventLeaveRequestsScreen({
-    Key? key,
-    required this.eventData,
-  }) : super(key: key);
+  EventLeaveRequestsScreen({Key? key, required Map<String, dynamic> eventData})
+      : event = Event.fromJson(eventData),
+        super(key: key);
 
   @override
   State<EventLeaveRequestsScreen> createState() =>
@@ -15,7 +19,6 @@ class EventLeaveRequestsScreen extends StatefulWidget {
 
 class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
   String? _selectedStatusFilter;
-
   final List<String> _statusOptions = [
     'Chờ duyệt',
     'Đã duyệt',
@@ -23,35 +26,67 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
     'Tất cả'
   ];
 
-  // Dữ liệu mẫu (sau này sẽ lấy từ API)
-  final List<Map<String, dynamic>> _leaveRequests = [
-    {
-      'user': 'Nguyễn Văn A',
-      'date': '2024-11-15',
-      'reason': 'Bận việc gia đình',
-      'status': 'Chờ duyệt',
-    },
-    {
-      'user': 'Trần Thị B',
-      'date': '2024-11-15',
-      'reason': 'Bị ốm',
-      'status': 'Đã duyệt',
-    },
-    {
-      'user': 'Lê Văn C',
-      'date': '2024-11-15',
-      'reason': 'Đi công tác',
-      'status': 'Đã từ chối',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadRequests();
+  }
 
-  List<Map<String, dynamic>> _filteredRequests() {
-    if (_selectedStatusFilter == null || _selectedStatusFilter == 'Tất cả') {
-      return _leaveRequests;
+  Future<void> _loadRequests() async {
+    if (widget.event.id == null) {
+      print('Error: Event ID is null');
+      return;
     }
-    return _leaveRequests
-        .where((req) => req['status'] == _selectedStatusFilter)
-        .toList();
+    await context
+        .read<AbsenceRequestProvider>()
+        .getEventRequests(widget.event.id!);
+  }
+
+  List<AbsenceRequest> _filteredRequests(List<AbsenceRequest> requests) {
+    if (_selectedStatusFilter == null || _selectedStatusFilter == 'Tất cả') {
+      return requests;
+    }
+    String status = _getStatusValue(_selectedStatusFilter!);
+    return requests.where((req) => req.status == status).toList();
+  }
+
+  String _getStatusValue(String displayStatus) {
+    switch (displayStatus) {
+      case 'Chờ duyệt':
+        return 'pending';
+      case 'Đã duyệt':
+        return 'approved';
+      case 'Đã từ chối':
+        return 'rejected';
+      default:
+        return 'pending';
+    }
+  }
+
+  String _getDisplayStatus(String status) {
+    switch (status) {
+      case 'pending':
+        return 'Chờ duyệt';
+      case 'approved':
+        return 'Đã duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
+      default:
+        return 'Không xác định';
+    }
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'Chờ duyệt':
+        return Colors.orange;
+      case 'Đã duyệt':
+        return Colors.green;
+      case 'Đã từ chối':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   @override
@@ -68,170 +103,195 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
         ),
         backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      body: Consumer<AbsenceRequestProvider>(
+        builder: (context, provider, child) {
+          if (provider.isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (provider.error != null) {
+            return Center(child: Text('Lỗi: ${provider.error}'));
+          }
+
+          final requests = provider.eventRequests;
+          final filteredRequests = _filteredRequests(requests);
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildAttendanceSummary(requests),
+                const SizedBox(height: 10),
+                buildAttendanceSummary2(requests),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: _buildCustomDropdown(
+                        hint: 'Chọn trạng thái',
+                        value: _selectedStatusFilter,
+                        items: _statusOptions,
+                        onItemSelected: (newValue) {
+                          setState(() {
+                            _selectedStatusFilter = newValue;
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: filteredRequests.length,
+                    itemBuilder: (context, index) {
+                      final request = filteredRequests[index];
+                      return _buildRequestCard(request);
+                    },
+                  ),
+                )
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRequestCard(AbsenceRequest request) {
+    return Card(
+      elevation: 4,
+      color: Colors.blue[50],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            buildAttendanceSummary(),
-            const SizedBox(height: 10),
-            buildAttendanceSummary2(),
-            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: _buildCustomDropdown(
-                    hint: 'Chọn trạng thái',
-                    value: _selectedStatusFilter,
-                    items: _statusOptions,
-                    onItemSelected: (newValue) {
-                      setState(() {
-                        _selectedStatusFilter = newValue;
-                      });
-                    },
+                Row(
+                  children: [
+                    const Icon(Icons.person, color: Colors.black54, size: 24),
+                    const SizedBox(width: 8),
+                    Text(
+                      request.userInfo?['name'] ??
+                          request.userInfo?['email'] ??
+                          '',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(_getDisplayStatus(request.status)),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.label, color: Colors.white, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        _getDisplayStatus(request.status),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredRequests().length,
-                itemBuilder: (context, index) {
-                  final request = _filteredRequests()[index];
-                  return Card(
-                    elevation: 4,
-                    color: Colors.blue[50],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 12),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.person,
-                                      color: Colors.black54, size: 24),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    request['user'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor(request['status']),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(Icons.label,
-                                        color: Colors.white, size: 14),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      request['status'],
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              const Icon(Icons.date_range,
-                                  color: Colors.black54, size: 20),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Ngày vắng mặt: ${request['date']}',
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              const Icon(Icons.comment,
-                                  color: Colors.black54, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Lý do: ${request['reason']}',
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (request['status'] == 'Chờ duyệt') ...[
-                            const SizedBox(height: 16),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      request['status'] = 'Đã duyệt';
-                                    });
-                                  },
-                                  icon: const Icon(Icons.check_circle,
-                                      color: Colors.green),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      request['status'] = 'Đã từ chối';
-                                    });
-                                  },
-                                  icon: const Icon(Icons.cancel,
-                                      color: Colors.red),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  );
-                },
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Icon(Icons.date_range, color: Colors.black54, size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'Ngày yêu cầu: ${DateFormat('dd/MM/yyyy').format(request.requestedAt)}',
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                const Icon(Icons.comment, color: Colors.black54, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lý do: ${request.reason}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+              ],
+            ),
+            if (request.status == 'pending') ...[
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    onPressed: () => _updateStatus(request.id!, 'approved'),
+                    icon: const Icon(Icons.check_circle, color: Colors.green),
+                  ),
+                  IconButton(
+                    onPressed: () => _updateStatus(request.id!, 'rejected'),
+                    icon: const Icon(Icons.cancel, color: Colors.red),
+                  ),
+                ],
               ),
-            )
+            ],
           ],
         ),
       ),
     );
   }
 
-  Widget buildAttendanceSummary() {
+  Future<void> _updateStatus(String requestId, String newStatus) async {
+    try {
+      await context
+          .read<AbsenceRequestProvider>()
+          .updateRequestStatus(requestId, newStatus);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Đã cập nhật trạng thái thành ${_getDisplayStatus(newStatus)}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+      );
+    }
+  }
+
+  Widget buildAttendanceSummary(List<AbsenceRequest> requests) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         buildSummaryCard(
           title: 'Tổng yêu cầu',
-          value: _leaveRequests.length.toString(),
+          value: requests.length.toString(),
           color: Colors.blue[100]!,
         ),
         const SizedBox(width: 5),
         buildSummaryCard(
           title: 'Chờ duyệt',
-          value: _leaveRequests
-              .where((req) => req['status'] == 'Chờ duyệt')
+          value: requests
+              .where((req) => req.status == 'pending')
               .length
               .toString(),
           color: Colors.orange[100]!,
@@ -240,14 +300,14 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
     );
   }
 
-  Widget buildAttendanceSummary2() {
+  Widget buildAttendanceSummary2(List<AbsenceRequest> requests) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         buildSummaryCard(
           title: 'Đã duyệt',
-          value: _leaveRequests
-              .where((req) => req['status'] == 'Đã duyệt')
+          value: requests
+              .where((req) => req.status == 'approved')
               .length
               .toString(),
           color: Colors.green[100]!,
@@ -255,8 +315,8 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
         const SizedBox(width: 5),
         buildSummaryCard(
           title: 'Đã từ chối',
-          value: _leaveRequests
-              .where((req) => req['status'] == 'Đã từ chối')
+          value: requests
+              .where((req) => req.status == 'rejected')
               .length
               .toString(),
           color: Colors.red[100]!,
@@ -280,10 +340,7 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-            ),
+            Text(title, style: TextStyle(fontSize: 16, color: Colors.black87)),
             const SizedBox(height: 5),
             Text(
               value,
@@ -326,18 +383,5 @@ class _EventLeaveRequestsScreenState extends State<EventLeaveRequestsScreen> {
         ),
       ),
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Chờ duyệt':
-        return Colors.orange;
-      case 'Đã duyệt':
-        return Colors.green;
-      case 'Đã từ chối':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

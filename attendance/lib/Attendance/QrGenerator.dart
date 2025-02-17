@@ -10,7 +10,8 @@ import 'dart:io';
 class QrGenerator extends StatefulWidget {
   final int initialExpireMinutes;
 
-  const QrGenerator({Key? key, required this.initialExpireMinutes}) : super(key: key);
+  const QrGenerator({Key? key, required this.initialExpireMinutes})
+      : super(key: key);
 
   @override
   _QrGeneratorState createState() => _QrGeneratorState();
@@ -20,7 +21,7 @@ class _QrGeneratorState extends State<QrGenerator> {
   late int expireMinutes;
 
   static const String apiUrl = "https://attendance-7f16.onrender.com/api/qr/generate";
-  static const String eventId = "6R3nnNmZ7RpF0qf42OiW";
+  static const String eventId = "rabPeQSPolmwCVzPDsWF";
 
   Uint8List? qrImage;
   DateTime? expireTime;
@@ -76,7 +77,6 @@ class _QrGeneratorState extends State<QrGenerator> {
     }
   }
 
-
   String _getBase64Data(String base64String) {
     if (base64String.contains(",")) {
       return base64String.split(",")[1];
@@ -115,14 +115,16 @@ class _QrGeneratorState extends State<QrGenerator> {
     await file.writeAsBytes(qrImage!);
 
     try {
-      await Share.shareXFiles([XFile(file.path)], text: "Mã QR điểm danh của bạn!");
+      await Share.shareXFiles([XFile(file.path)],
+          text: "Mã QR điểm danh của bạn!");
     } catch (e) {
       showSnackBar("Lỗi khi chia sẻ: $e");
     }
   }
 
   void showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -159,7 +161,8 @@ class _QrGeneratorState extends State<QrGenerator> {
                   showModalBottomSheet(
                     context: context,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16)),
                     ),
                     builder: (context) {
                       return _buildTimeSelectionSheet(context);
@@ -176,8 +179,8 @@ class _QrGeneratorState extends State<QrGenerator> {
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);  // Đóng modal tùy chọn
-                  generateQR();  // Tạo lại mã QR mới
+                  Navigator.pop(context); // Đóng modal tùy chọn
+                  generateQR(); // Tạo lại mã QR mới
                 },
               ),
               Divider(),
@@ -189,7 +192,7 @@ class _QrGeneratorState extends State<QrGenerator> {
                   ),
                 ),
                 onTap: () {
-                  Navigator.pop(context);  // Đóng modal tùy chọn
+                  Navigator.pop(context); // Đóng modal tùy chọn
                 },
               ),
             ],
@@ -211,20 +214,23 @@ class _QrGeneratorState extends State<QrGenerator> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("Chọn thời gian điểm danh", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text("Chọn thời gian điểm danh",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           SizedBox(height: 12),
           ...timeOptions.map((minutes) => ListTile(
-            title: Text("$minutes phút"),
-            onTap: () {
-              Navigator.pop(context);  // Đóng thời gian bottom sheet
-              Navigator.pop(context);  // Đóng modal tùy chọn
-              setState(() {
-                expireMinutes = minutes; // Cập nhật thời gian cho widget hiện tại
-                expireTime = DateTime.now().add(Duration(minutes: expireMinutes)); // Cập nhật thời gian hết hạn
-                startCountdown(); // Bắt đầu đếm ngược lại
-              });
-            },
-          )),
+                title: Text("$minutes phút"),
+                onTap: () {
+                  Navigator.pop(context); // Đóng thời gian bottom sheet
+                  Navigator.pop(context); // Đóng modal tùy chọn
+                  setState(() {
+                    expireMinutes =
+                        minutes; // Cập nhật thời gian cho widget hiện tại
+                    expireTime = DateTime.now().add(Duration(
+                        minutes: expireMinutes)); // Cập nhật thời gian hết hạn
+                    startCountdown(); // Bắt đầu đếm ngược lại
+                  });
+                },
+              )),
           Divider(),
         ],
       ),
@@ -235,7 +241,8 @@ class _QrGeneratorState extends State<QrGenerator> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Mã QR Điểm Danh", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+        title: Text("Mã QR Điểm Danh",
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
       ),
@@ -253,7 +260,9 @@ class _QrGeneratorState extends State<QrGenerator> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(blurRadius: 10, color: Colors.black26)],
+                    boxShadow: [
+                      BoxShadow(blurRadius: 10, color: Colors.black26)
+                    ],
                   ),
                   child: SizedBox(
                     width: 300,
@@ -264,10 +273,14 @@ class _QrGeneratorState extends State<QrGenerator> {
                 SizedBox(height: 20),
                 Text(
                   "Mã QR hết hạn sau: ${remainingTime.inMinutes}:${(remainingTime.inSeconds % 60).toString().padLeft(2, '0')}",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.red),
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red),
                 ),
                 if (remainingTime.isNegative)
-                  Text("Mã QR đã hết hạn!", style: TextStyle(color: Colors.red, fontSize: 18)),
+                  Text("Mã QR đã hết hạn!",
+                      style: TextStyle(color: Colors.red, fontSize: 18)),
               ],
             ],
           ),
@@ -289,7 +302,8 @@ class _QrGeneratorState extends State<QrGenerator> {
               backgroundColor: Colors.white,
             ),
             FloatingActionButton(
-              onPressed: _showModalBottomSheet,  // Hiển thị modal bottom sheet khi nhấn
+              onPressed:
+                  _showModalBottomSheet, // Hiển thị modal bottom sheet khi nhấn
               child: Icon(Icons.more_vert, color: Colors.blue),
               backgroundColor: Colors.white,
             ),

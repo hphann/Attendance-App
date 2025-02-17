@@ -1,10 +1,10 @@
-// lib/models/event_participant.dart
 class EventParticipant {
   final String? id;
   final String eventId;
   final String userId;
   final String status;
-  final DateTime createdAt;
+  final String? addedBy;
+  final DateTime? addedAt;
   final Map<String, dynamic>? userInfo;
 
   EventParticipant({
@@ -12,17 +12,22 @@ class EventParticipant {
     required this.eventId,
     required this.userId,
     required this.status,
-    required this.createdAt,
+    this.addedBy,
+    this.addedAt,
     this.userInfo,
   });
 
   factory EventParticipant.fromJson(Map<String, dynamic> json) {
     return EventParticipant(
       id: json['id'],
-      eventId: json['eventId'],
-      userId: json['userId'],
-      status: json['status'],
-      createdAt: DateTime.parse(json['createdAt']),
+      eventId: json['eventId'] ?? '',
+      userId: json['userId'] ?? '',
+      status: json['status'] ?? 'pending',
+      addedBy: json['addedBy'],
+      addedAt: json['addedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              json['addedAt']['_seconds'] * 1000)
+          : null,
       userInfo: json['userInfo'],
     );
   }
@@ -32,7 +37,8 @@ class EventParticipant {
         'eventId': eventId,
         'userId': userId,
         'status': status,
-        'createdAt': createdAt.toIso8601String(),
+        'addedBy': addedBy,
+        'addedAt': addedAt?.toIso8601String(),
         'userInfo': userInfo,
       };
 }

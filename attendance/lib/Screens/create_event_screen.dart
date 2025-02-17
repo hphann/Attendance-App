@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:attendance/providers/event_provider.dart';
+import 'package:attendance/services/user_service.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({Key? key}) : super(key: key);
@@ -22,6 +25,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   bool _isLoading = false;
   final _memberController = TextEditingController();
   List<String> _members = [];
+  final UserService _userService = UserService();
+  bool _isCheckingEmail = false;
 
   final List<String> _repeatOptions = [
     'Không lặp lại',
@@ -94,25 +99,35 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement event creation
-      final event = {
+      final eventData = {
         'name': _nameController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
-        'startDate': _startDate,
-        'startTime': _startTime,
-        'endDate': _endDate,
-        'endTime': _endTime,
+        'startTime': DateTime(
+          _startDate!.year,
+          _startDate!.month,
+          _startDate!.day,
+          _startTime!.hour,
+          _startTime!.minute,
+        ).toIso8601String(),
+        'endTime': DateTime(
+          _endDate!.year,
+          _endDate!.month,
+          _endDate!.day,
+          _endTime!.hour,
+          _endTime!.minute,
+        ).toIso8601String(),
+        'type': 'event',
         'repeat': _selectedRepeat,
         'daysOfWeek': _selectedRepeat == 'Hằng tuần'
             ? _weekDays
                 .where((day) => _selectedDays[_weekDays.indexOf(day)])
                 .toList()
             : null,
+        'members': _members,
       };
 
-      // Giả lập delay network
-      await Future.delayed(const Duration(seconds: 1));
+      await context.read<EventProvider>().createEvent(eventData);
 
       if (!mounted) return;
 
@@ -135,6 +150,61 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _checkAndAddMember() async {
+    final email = _memberController.text.trim();
+    if (email.isEmpty) return;
+
+    // Validate email format
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email không hợp lệ')),
+      );
+      return;
+    }
+
+    // Check if email already added
+    if (_members.contains(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email đã được thêm')),
+      );
+      return;
+    }
+
+    setState(() => _isCheckingEmail = true);
+
+    try {
+      final exists = await _userService.checkEmailExists(email);
+
+      if (!mounted) return;
+
+      if (exists) {
+        setState(() {
+          _members.add(email);
+          _memberController.clear();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Email không tồn tại trong hệ thống'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Lỗi: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isCheckingEmail = false);
       }
     }
   }
@@ -165,19 +235,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             ),
             const SizedBox(width: 8),
             ElevatedButton(
-              onPressed: () {
-                if (_memberController.text.isNotEmpty) {
-                  setState(() {
-                    _members.add(_memberController.text);
-                    _memberController.clear();
-                  });
-                }
-              },
+              onPressed: _isCheckingEmail ? null : _checkAndAddMember,
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 backgroundColor: Colors.blue,
               ),
-              child: const Text('Thêm', style: TextStyle(color: Colors.white)),
+              child: _isCheckingEmail
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Text('Thêm', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),

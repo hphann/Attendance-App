@@ -1,7 +1,10 @@
 import 'package:attendance/Screens/EventDetail.dart';
 import 'package:attendance/Screens/create_event_screen.dart';
+import 'package:attendance/models/event.dart';
+import 'package:attendance/providers/event_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class EventScreen extends StatefulWidget {
   const EventScreen({super.key});
@@ -12,51 +15,40 @@ class EventScreen extends StatefulWidget {
 
 class _EventScreenState extends State<EventScreen> {
   int _selectedTab = 0;
+  bool _isLoading = false;
 
-  final List<Map<String, dynamic>> _eventData = [
-    {
-      'className': 'Hội thảo công nghệ',
-      'time': '09:00 - 12:00',
-      'date': DateTime(2025, 01, 15),
-      'location': 'Hội trường A',
-      'members': [
-        {'email': 'member1@example.com', 'status': 'notYet'},
-        {'email': 'member2@example.com', 'status': 'present'},
-        {'email': 'member3@example.com', 'status': 'absent'},
-      ],
-    },
-    {
-      'className': 'Họp nhóm dự án',
-      'time': '14:00 - 16:00',
-      'date': DateTime(2025, 01, 10),
-      'location': 'Phòng họp B',
-    },
-    {
-      'className': 'Workshop Flutter',
-      'time': '07:00 - 10:00',
-      'date': DateTime(2025, 01, 08),
-      'location': 'Phòng C',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchEvents();
+  }
 
-  List<Map<String, dynamic>> _getFilteredEventData() {
+  Future<void> _fetchEvents() async {
+    setState(() => _isLoading = true);
+    try {
+      await context.read<EventProvider>().fetchEvents();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  List<Event> _getFilteredEvents(List<Event> events) {
     final now = DateTime.now();
     switch (_selectedTab) {
       case 0: // Sắp tới
-        return _eventData.where((event) => event['date'].isAfter(now)).toList();
+        return events.where((event) => event.startTime.isAfter(now)).toList();
       case 1: // Đang diễn ra
-        return _eventData.where((event) {
-          final eventDate = event['date'];
-          return eventDate.year == now.year &&
-              eventDate.month == now.month &&
-              eventDate.day == now.day;
+        return events.where((event) {
+          return event.startTime.isBefore(now) && event.endTime.isAfter(now);
         }).toList();
       case 2: // Đã kết thúc
-        return _eventData
-            .where((event) => event['date'].isBefore(now))
-            .toList();
+        return events.where((event) => event.endTime.isBefore(now)).toList();
       default:
-        return _eventData;
+        return events;
     }
   }
 
@@ -68,90 +60,106 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredEvents = _getFilteredEventData();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ứng dụng Điểm danh',
-            style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
+        title: const Text(
+          'Ứng dụng Điểm danh',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         backgroundColor: Colors.blue,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildStatsSection(),
-            const SizedBox(height: 20),
-            _buildTabs(),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filteredEvents.length,
-                itemBuilder: (context, index) {
-                  final event = filteredEvents[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => EventDetail(eventData: event),
-                        ),
-                      );
-                    },
-                    child: _buildEventCard(
-                      className: event['className'],
-                      time: event['time'],
-                      date: DateFormat('dd/MM/yyyy').format(event['date']),
-                      location: event['location'],
-                      members: event['members']?.cast<Map<String, dynamic>>(),
-                    ),
-                  );
-                },
+      body: Consumer<EventProvider>(
+        builder: (context, eventProvider, child) {
+          if (_isLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final filteredEvents = _getFilteredEvents(eventProvider.events);
+
+          return RefreshIndicator(
+            onRefresh: _fetchEvents,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildStatsSection(eventProvider.events),
+                  const SizedBox(height: 20),
+                  _buildTabs(),
+                  const SizedBox(height: 20),
+                  Expanded(
+                    child: filteredEvents.isEmpty
+                        ? const Center(
+                            child: Text('Không có sự kiện nào'),
+                          )
+                        : ListView.builder(
+                            itemCount: filteredEvents.length,
+                            itemBuilder: (context, index) {
+                              final event = filteredEvents[index];
+                              return _buildEventCard(event);
+                            },
+                          ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => const CreateEventScreen(),
             ),
           );
+          if (result == true) {
+            _fetchEvents();
+          }
         },
-        child: const Icon(Icons.add, color: Colors.white),
         backgroundColor: Colors.blue,
+        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
 
-  Widget _buildStatsSection() {
+  Widget _buildStatsSection(List<Event> events) {
+    final now = DateTime.now();
+    final upcoming = events.where((e) => e.startTime.isAfter(now)).length;
+    final ongoing = events
+        .where((e) => e.startTime.isBefore(now) && e.endTime.isAfter(now))
+        .length;
+    final completed = events.where((e) => e.endTime.isBefore(now)).length;
+
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-          color: Colors.blue, borderRadius: BorderRadius.circular(12)),
+        color: Colors.blue,
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Thống kê sự kiện',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold)),
+          const Text(
+            'Thống kê sự kiện',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatItem(
-                  'Sắp tới', _getFilteredEventData().length.toString()),
-              _buildStatItem('Đang diễn ra', '1'),
-              _buildStatItem('Đã kết thúc', '4'),
+              _buildStatItem('Sắp tới', upcoming.toString()),
+              _buildStatItem('Đang diễn ra', ongoing.toString()),
+              _buildStatItem('Đã kết thúc', completed.toString()),
             ],
           ),
         ],
@@ -205,62 +213,79 @@ class _EventScreenState extends State<EventScreen> {
     );
   }
 
-  Widget _buildEventCard({
-    required String className,
-    required String time,
-    required String date,
-    required String location,
-    List<Map<String, dynamic>>? members,
-  }) {
+  Widget _buildEventCard(Event event) {
     return Card(
-      elevation: 2,
-      color: Colors.blue[50],
-      margin: const EdgeInsets.only(bottom: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(className,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(time),
-              ],
+      margin: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => EventDetail(event: event),
             ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.calendar_today,
-                    size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Text(date),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.location_on, size: 16, color: Colors.black54),
-                const SizedBox(width: 8),
-                Expanded(child: Text(location)),
-              ],
-            ),
-            if (members != null && members.isNotEmpty) ...[
+          ).then((value) {
+            if (value == true) {
+              _fetchEvents();
+            }
+          });
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                event.name,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  const Icon(Icons.people, size: 16, color: Colors.black54),
+                  const Icon(Icons.access_time,
+                      size: 16, color: Colors.black54),
                   const SizedBox(width: 8),
-                  Text('${members.length} thành viên'),
+                  Text(
+                    '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ],
               ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today,
+                      size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Text(
+                    DateFormat('dd/MM/yyyy').format(event.startTime),
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.location_on,
+                      size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Text(event.location),
+                ],
+              ),
+              if (event.participants != null) ...[
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    const Icon(Icons.people, size: 16, color: Colors.black54),
+                    const SizedBox(width: 8),
+                    Text('${event.participants!.length} thành viên'),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

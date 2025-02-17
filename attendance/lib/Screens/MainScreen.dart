@@ -4,7 +4,6 @@ import 'AccountScreen.dart';
 import '../Attendance/QrScanner.dart';
 import 'EventScreen.dart';
 import 'HomeScreen.dart';
-import 'dart:async';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -25,11 +24,11 @@ class _MainScreenState extends State<MainScreen> {
   ];
 
   final List<Widget> _screens = [
-    HomeScreen(),
-    EventScreen(),
-    QrScanner(),
-    LeaveScreen(),
-    AccountScreen(),
+    const HomeScreen(),
+    const EventScreen(),
+    const QrScanner(),
+    const LeaveScreen(),
+    const AccountScreen(),
   ];
 
   void _onItemTapped(int index) {

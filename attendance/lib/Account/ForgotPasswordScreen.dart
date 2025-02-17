@@ -26,7 +26,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Future<bool> sendResetEmail(String email) async {
-    final url = Uri.parse('https://attendance-7f16.onrender.com/api/auth/forgot-password');
+    final url = Uri.parse(
+        'https://attendance-7f16.onrender.com/api/auth/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -35,7 +36,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (response.statusCode == 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Mã xác minh đã được gửi đến email của bạn')),
+        const SnackBar(
+            content: Text('Mã xác minh đã được gửi đến email của bạn')),
       );
       return true;
     } else {
@@ -92,10 +94,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       padding: const EdgeInsets.only(top: 50, bottom: 30),
                       child: Lottie.asset(
-                        'animation/forgot_password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                        'assets/animation/forgot_password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
                         width: 250,
                         height: 250,
-                        repeat: true,  // Nếu muốn lặp lại animation
+                        repeat: true, // Nếu muốn lặp lại animation
                       ),
                     ),
                   ),
@@ -118,26 +120,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     onPressed: isLoading
                         ? null
                         : () async {
-                      if (_formKey.currentState!.validate()) {
-                        setState(() {
-                          isLoading = true;
-                        });
-                        bool isSent = await sendResetEmail(_emailController.text.trim());
-                        setState(() {
-                          isLoading = false;
-                        });
-                        if (isSent) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VerifyEmailScreen(
-                                email: _emailController.text.trim(),
-                              ),
-                            ),
-                          );
-                        }
-                      }
-                    },
+                            if (_formKey.currentState!.validate()) {
+                              setState(() {
+                                isLoading = true;
+                              });
+                              bool isSent = await sendResetEmail(
+                                  _emailController.text.trim());
+                              setState(() {
+                                isLoading = false;
+                              });
+                              if (isSent) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VerifyEmailScreen(
+                                      email: _emailController.text.trim(),
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF4285F4),
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -147,16 +150,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     child: isLoading
                         ? const CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    )
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          )
                         : const Text(
-                      'Gửi',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                            'Gửi',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ],
               ),
@@ -214,7 +218,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   bool _isValidEmail(String email) {
-    final emailRegExp = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegExp =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     return emailRegExp.hasMatch(email);
   }
 }

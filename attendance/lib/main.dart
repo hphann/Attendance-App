@@ -8,8 +8,8 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/user_provider.dart';
 import 'package:attendance/providers/event_provider.dart';
-import 'package:attendance/providers/participant_provider.dart';
-import 'package:attendance/providers/report_provider.dart';
+import 'package:attendance/providers/absence_request_provider.dart';
+import 'package:attendance/providers/event_participant_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,9 +26,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
-        // ChangeNotifierProvider(create: (_) => EventProvider()),
-        // ChangeNotifierProvider(create: (_) => ParticipantProvider()),
-        // ChangeNotifierProvider(create: (_) => ReportProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => EventParticipantProvider()),
+        ChangeNotifierProvider(create: (_) => AbsenceRequestProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -65,7 +65,6 @@ class _SplashScreenState extends State<SplashScreen> {
     bool isLoggedIn = await _checkLoginStatus();
 
     if (isLoggedIn) {
-      // Load user data before navigating
       await context.read<UserProvider>().loadUserProfile();
       if (!mounted) return;
 

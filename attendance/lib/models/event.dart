@@ -1,17 +1,20 @@
+import 'package:attendance/models/event_participant.dart';
+
 class Event {
   final String? id;
-  final String name;
-  final String description;
-  final DateTime startTime;
-  final DateTime endTime;
+  String name;
+  String description;
+  DateTime startTime;
+  DateTime endTime;
   final String type;
-  final String location;
+  String location;
   final String createdBy;
-  // final DateTime createdAt;
-  // String status;
+  final Map<String, dynamic>? createdByUser;
+
   final String? repeat;
   final List<String>? daysOfWeek;
   final String? time;
+  List<EventParticipant>? participants;
 
   Event({
     this.id,
@@ -22,11 +25,11 @@ class Event {
     required this.type,
     required this.location,
     required this.createdBy,
-    // required this.createdAt,
-    // required this.status,
+    this.createdByUser,
     this.repeat,
     this.daysOfWeek,
     this.time,
+    this.participants,
   });
 
   String getStatus() {
@@ -63,20 +66,21 @@ class Event {
   }
 
   factory Event.fromJson(Map<String, dynamic> json) {
+    print('Parsing Event JSON: $json');
     DateTime parseDate(dynamic value) {
       if (value == null) return DateTime.now();
       if (value is String) {
         try {
-          return DateTime.parse(value);
+          return DateTime.parse(value).toLocal();
         } catch (e) {
           print('Error parsing date: $e');
           return DateTime.now();
         }
       }
       if (value is Map) {
-        // Handle Firestore Timestamp
         if (value['_seconds'] != null) {
-          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
+          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000)
+              .toLocal();
         }
       }
       return DateTime.now();
@@ -91,17 +95,19 @@ class Event {
       type: json['type'] ?? 'event',
       location: json['location'] ?? '',
       createdBy: json['createdBy'] ?? '',
-      // createdAt: parseDate(json['createdAt']),
-      // status: json['status'] ?? 'active',
+      createdByUser: json['createdByUser'],
       repeat: json['repeat'],
       daysOfWeek: json['daysOfWeek'] != null
           ? List<String>.from(json['daysOfWeek'])
           : null,
       time: json['time'],
+      participants: json['participants'] != null
+          ? (json['participants'] as List)
+              .map((p) => EventParticipant.fromJson(p))
+              .toList()
+          : null,
     );
-
-    // event.status = event.getStatus();
-
+    print('Parsed Event: ${event.toJson()}');
     return event;
   }
 
@@ -113,9 +119,11 @@ class Event {
         'type': type,
         'location': location,
         'createdBy': createdBy,
+        'createdByUser': createdByUser,
         // 'status': status,
         'repeat': repeat,
         'daysOfWeek': daysOfWeek,
         'time': time,
+        'participants': participants?.map((p) => p.toJson()).toList(),
       };
 }

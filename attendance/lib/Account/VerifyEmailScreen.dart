@@ -88,7 +88,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const ForgotPasswordScreen()),
             );
           },
         ),
@@ -119,24 +120,24 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         color: Color(0xFFE8F0FE),
                         shape: BoxShape.circle,
                       ),
-                      padding: EdgeInsets.only(top: 50, bottom: 30),
+                      padding: const EdgeInsets.only(top: 50, bottom: 30),
                       child: Lottie.asset(
-                        'assets/animation/email.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                        'assets/animation/email.json',
                         width: 250,
                         height: 250,
-                        repeat: true, // Nếu muốn lặp lại animation
+                        repeat: true,
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: const Text(
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
                       'Vui lòng nhập mã gồm 6 chữ số \n được gửi tới email của bạn',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 16, color: Colors.black87),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 50,
                   ),
                   _buildTextField(
@@ -145,7 +146,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     keyboardType: TextInputType.number,
                     obscureText: true,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   GestureDetector(
@@ -168,7 +169,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 50,
                   ),
                   ElevatedButton(
