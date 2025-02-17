@@ -8,12 +8,14 @@ class DistanceSelectionSheet extends StatefulWidget {
   final List<int> distanceOptions;
   final int selectedTime;
   final Position initialPosition;
+  final String eventId;
 
   const DistanceSelectionSheet({
     Key? key,
     required this.distanceOptions,
     required this.selectedTime,
     required this.initialPosition,
+    required this.eventId,
   }) : super(key: key);
 
   @override
@@ -56,8 +58,7 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
                   enabled: !_isLoading,
                   onTap: () async {
                     Navigator.pop(context);
-                    _showConfirmDialog(context, widget.selectedTime, distance,
-                        widget.initialPosition);
+                    _showConfirmDialog(context, distance);
                   },
                 );
               },
@@ -76,8 +77,7 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
     );
   }
 
-  void _showConfirmDialog(
-      BuildContext context, int selectedTime, int distance, Position position) {
+  void _showConfirmDialog(BuildContext context, int distance) {
     showDialog(
       context: context,
       builder: (context) {
@@ -103,7 +103,7 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
                   SizedBox(width: 8),
                   Text('Thời gian: ',
                       style: TextStyle(fontWeight: FontWeight.w600)),
-                  Text('$selectedTime phút'),
+                  Text('${widget.selectedTime} phút'),
                 ],
               ),
               SizedBox(height: 10),
@@ -133,14 +133,13 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
               onPressed: () async {
                 _showLoadingDialog(context);
                 try {
-                  final eventId = "NKXg8KNeYFqXFR8oFtOZ";
                   final result = await createGPSAttendance(
-                    eventId: eventId,
-                    latitude: position.latitude,
-                    longitude: position.longitude,
+                    eventId: widget.eventId,
+                    latitude: widget.initialPosition.latitude,
+                    longitude: widget.initialPosition.longitude,
                     distance: distance,
                     sessionTime: DateTime.now(),
-                    validMinutes: selectedTime,
+                    validMinutes: widget.selectedTime,
                   );
                   if (context.mounted) {
                     Navigator.of(context, rootNavigator: true)

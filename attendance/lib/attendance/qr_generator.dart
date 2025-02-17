@@ -8,10 +8,14 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 class QrGenerator extends StatefulWidget {
+  final String eventId;
   final int initialExpireMinutes;
 
-  const QrGenerator({Key? key, required this.initialExpireMinutes})
-      : super(key: key);
+  const QrGenerator({
+    Key? key,
+    required this.eventId,
+    required this.initialExpireMinutes,
+  }) : super(key: key);
 
   @override
   _QrGeneratorState createState() => _QrGeneratorState();
@@ -20,8 +24,8 @@ class QrGenerator extends StatefulWidget {
 class _QrGeneratorState extends State<QrGenerator> {
   late int expireMinutes;
 
-  static const String apiUrl = "https://attendance-7f16.onrender.com/api/qr/generate";
-  static const String eventId = "rabPeQSPolmwCVzPDsWF";
+  static const String apiUrl =
+      "https://attendance-7f16.onrender.com/api/qr/generate";
 
   Uint8List? qrImage;
   DateTime? expireTime;
@@ -48,7 +52,7 @@ class _QrGeneratorState extends State<QrGenerator> {
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "event_id": eventId,
+          "event_id": widget.eventId,
           "valid_minutes": expireMinutes,
           "session_time": sessionTime,
         }),

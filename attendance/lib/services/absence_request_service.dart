@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AbsenceRequestService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api',
+    baseUrl: 'https://attendance-7f16.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -40,9 +40,7 @@ class AbsenceRequestService {
   Future<List<AbsenceRequest>> getEventRequests(String eventId) async {
     try {
       await _setUserId();
-      print('Fetching requests for event: $eventId');
       final response = await _dio.get('/absence-requests/event/$eventId');
-      print('Response: ${response.data}');
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -54,8 +52,6 @@ class AbsenceRequestService {
       }
       throw Exception('Lấy danh sách yêu cầu thất bại');
     } on DioException catch (e) {
-      print('Error: ${e.message}');
-      print('Error response: ${e.response?.data}');
       throw Exception('Lỗi khi lấy danh sách yêu cầu: ${e.message}');
     }
   }

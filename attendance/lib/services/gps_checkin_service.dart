@@ -5,9 +5,10 @@ import 'dart:convert';
 import 'dialog_service.dart';
 
 class GpsService {
-  static Future<void> processGpsCheckIn(BuildContext context, String userId) async {
-    const String apiUrl = "https://attendance-7f16.onrender.com/api/gps/check-in-gps";
-    const String eventId = "NKXg8KNeYFqXFR8oFtOZ";
+  static Future<void> processGpsCheckIn(
+      BuildContext context, String userId, String eventId) async {
+    const String apiUrl =
+        "https://attendance-7f16.onrender.com/api/gps/check-in-gps";
 
     // Hiển thị dialog chờ
     _showLoadingDialog(context);
@@ -22,7 +23,8 @@ class GpsService {
 
       if (sessionId == null || sessionId.isEmpty) {
         // Người dùng không nhập session ID
-        DialogService.showErrorDialog(context, "Lỗi", "Bạn cần nhập mã điểm danh.");
+        DialogService.showErrorDialog(
+            context, "Lỗi", "Bạn cần nhập mã điểm danh.");
         return;
       }
 
@@ -52,7 +54,8 @@ class GpsService {
     } catch (e) {
       // Đóng dialog chờ nếu có lỗi
       Navigator.of(context, rootNavigator: true).pop();
-      DialogService.showErrorDialog(context, "Lỗi", "Không thể lấy vị trí hoặc điểm danh.");
+      DialogService.showErrorDialog(
+          context, "Lỗi", "Không thể lấy vị trí hoặc điểm danh.");
     }
   }
 
@@ -87,7 +90,8 @@ class GpsService {
             children: const [
               Icon(Icons.vpn_key, color: Colors.blue),
               SizedBox(width: 10),
-              Text("Nhập mã điểm danh GPS", style: TextStyle(fontWeight: FontWeight.bold)),
+              Text("Nhập mã điểm danh GPS",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
             ],
           ),
           content: TextField(
@@ -123,7 +127,8 @@ class GpsService {
                   borderRadius: BorderRadius.circular(8),
                 ),
               ),
-              child: const Text("Xác nhận", style: TextStyle(color: Colors.white)),
+              child:
+                  const Text("Xác nhận", style: TextStyle(color: Colors.white)),
               onPressed: () {
                 Navigator.of(context).pop(sessionId);
               },
@@ -142,10 +147,13 @@ class GpsService {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) throw Exception("Cần cấp quyền vị trí");
-      if (permission == LocationPermission.deniedForever) throw Exception("Hãy bật quyền vị trí trong cài đặt");
+      if (permission == LocationPermission.denied)
+        throw Exception("Cần cấp quyền vị trí");
+      if (permission == LocationPermission.deniedForever)
+        throw Exception("Hãy bật quyền vị trí trong cài đặt");
     }
 
-    return await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
   }
 }

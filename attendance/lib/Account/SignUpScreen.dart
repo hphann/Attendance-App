@@ -1,5 +1,5 @@
-import 'package:attendance/Account/LoginScreen.dart';
-import 'package:attendance/Screens/HomeScreen.dart';
+import 'package:attendance/account/LoginScreen.dart';
+import 'package:attendance/Screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

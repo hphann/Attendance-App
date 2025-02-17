@@ -1,5 +1,5 @@
-import 'package:attendance/Account/CreateNewPasswordScreen.dart';
-import 'package:attendance/Account/ForgotPasswordScreen.dart';
+import 'package:attendance/account/CreateNewPasswordScreen.dart';
+import 'package:attendance/account/ForgotPasswordScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

@@ -4,7 +4,7 @@ import 'package:attendance/models/event_participant.dart';
 
 class EventParticipantService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api',
+    baseUrl: 'https://attendance-7f16.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },

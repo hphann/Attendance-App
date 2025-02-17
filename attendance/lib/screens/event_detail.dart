@@ -1,4 +1,4 @@
-import 'package:attendance/Attendance/attendance_methods_create.dart';
+import 'package:attendance/attendance/attendance_methods_create.dart';
 import 'package:attendance/widgets/attendance_history_card.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance/widgets/add_member_bottom_sheet.dart';
@@ -42,7 +42,9 @@ class _EventDetailState extends State<EventDetail> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => const AttendanceMethodsSheet2(),
+      builder: (context) => AttendanceMethodsSheet2(
+        eventId: widget.event.id!,
+      ),
     );
   }
 
@@ -340,9 +342,9 @@ class _EventDetailState extends State<EventDetail> {
                     leading: CircleAvatar(
                       backgroundColor: Colors.blue.shade50,
                       child: Text(
-                        participant.userInfo?['name']?[0].toUpperCase() ?? 
-                        participant.userInfo?['email']?[0].toUpperCase() ?? 
-                        'U',
+                        participant.userInfo?['name']?[0].toUpperCase() ??
+                            participant.userInfo?['email']?[0].toUpperCase() ??
+                            'U',
                         style: TextStyle(
                           color: Colors.blue.shade700,
                           fontWeight: FontWeight.bold,
@@ -350,9 +352,9 @@ class _EventDetailState extends State<EventDetail> {
                       ),
                     ),
                     title: Text(
-                      participant.userInfo?['name'] ?? 
-                      participant.userInfo?['email'] ?? 
-                      'Unknown User',
+                      participant.userInfo?['name'] ??
+                          participant.userInfo?['email'] ??
+                          'Unknown User',
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,8 +366,8 @@ class _EventDetailState extends State<EventDetail> {
                         Text(
                           'Trạng thái: ${participant.status}',
                           style: TextStyle(
-                            color: participant.status == 'active' 
-                                ? Colors.green 
+                            color: participant.status == 'active'
+                                ? Colors.green
                                 : Colors.orange,
                           ),
                         ),

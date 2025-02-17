@@ -1,10 +1,15 @@
-import 'package:attendance/Attendance/QrGenerator.dart';
-import 'package:attendance/Attendance/distance_selection_sheet.dart';
+import 'package:attendance/attendance/qr_generator.dart';
+import 'package:attendance/attendance/distance_selection_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
 class AttendanceMethodsSheet2 extends StatelessWidget {
-  const AttendanceMethodsSheet2({Key? key}) : super(key: key);
+  final String eventId;
+
+  const AttendanceMethodsSheet2({
+    Key? key,
+    required this.eventId,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +83,7 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
                 try {
                   Position position = await _getCurrentLocation();
                   Navigator.pop(context);
-                  Navigator.of(context, rootNavigator: true)
-                      .pop();
+                  Navigator.of(context, rootNavigator: true).pop();
                   if (context.mounted) {
                     showModalBottomSheet(
                       context: context,
@@ -213,8 +217,10 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              QrGenerator(initialExpireMinutes: minutes),
+                          builder: (context) => QrGenerator(
+                            eventId: eventId,
+                            initialExpireMinutes: minutes,
+                          ),
                         ),
                       );
                     },
@@ -287,6 +293,7 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
           distanceOptions: const [5, 10, 15, 20, 30, 50, 100],
           selectedTime: selectedTime,
           initialPosition: position,
+          eventId: eventId,
         );
       },
     );

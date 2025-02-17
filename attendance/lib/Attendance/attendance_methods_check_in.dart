@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:attendance/Attendance/QrScanner.dart';
+import 'package:attendance/attendance/qr_scanner.dart';
 import 'package:attendance/services/gps_checkin_service.dart';
 import 'package:attendance/services/storage_service.dart';
 import 'package:attendance/services/dialog_service.dart';
 import 'button_check_in.dart';
 
 class AttendanceMethodsSheet extends StatelessWidget {
-  const AttendanceMethodsSheet({Key? key}) : super(key: key);
+  final String eventId;
+
+  const AttendanceMethodsSheet({
+    Key? key,
+    required this.eventId,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +31,8 @@ class AttendanceMethodsSheet extends StatelessWidget {
               label: 'Quét QR Code',
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => QrScanner()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => QrScanner()));
               },
             ),
             ButtonCheckIn(
@@ -35,10 +41,11 @@ class AttendanceMethodsSheet extends StatelessWidget {
               onTap: () async {
                 String? userId = await StorageService.getUserId();
                 if (userId == null) {
-                  DialogService.showErrorDialog(context, 'Lỗi', 'Chưa đăng nhập, vui lòng đăng nhập lại!');
+                  DialogService.showErrorDialog(
+                      context, 'Lỗi', 'Chưa đăng nhập');
                   return;
                 }
-                GpsService.processGpsCheckIn(context, userId);
+                GpsService.processGpsCheckIn(context, userId, eventId);
               },
             ),
             ButtonCheckIn(

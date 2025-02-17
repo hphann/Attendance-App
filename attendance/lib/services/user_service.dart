@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api',
+    baseUrl: 'https://attendance-7f16.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -165,8 +165,7 @@ class UserService {
       }
       return false;
     } on DioException catch (e) {
-      print('Error checking email: ${e.message}');
-      return false;
+      throw Exception('Lỗi khi kiểm tra email: ${e.message}');
     }
   }
 }

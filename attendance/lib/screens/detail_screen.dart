@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/widgets/attendance_history_card.dart';
-import 'package:attendance/Attendance/attendance_methods_check_in.dart';
+import 'package:attendance/attendance/attendance_methods_check_in.dart';
 import 'package:attendance/screens/absence_registration_screen.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -22,7 +22,9 @@ class _DetailScreenState extends State<DetailScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (context) => const AttendanceMethodsSheet(),
+      builder: (context) => AttendanceMethodsSheet(
+        eventId: widget.eventData['id'],
+      ),
     );
   }
 

@@ -1,5 +1,5 @@
-import 'package:attendance/Account/LoginScreen.dart';
-import 'package:attendance/Account/VerifyEmailScreen.dart';
+import 'package:attendance/account/LoginScreen.dart';
+import 'package:attendance/account/VerifyEmailScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

@@ -1,4 +1,4 @@
-import 'package:attendance/Account/LoginScreen.dart';
+import 'package:attendance/account/LoginScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/services/attendance_service.dart';

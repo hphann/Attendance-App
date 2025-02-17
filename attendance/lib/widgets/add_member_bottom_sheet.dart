@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:attendance/services/user_service.dart';
 
 class AddMemberBottomSheet extends StatefulWidget {
   final Function(List<String>) onMembersAdded;
@@ -13,13 +14,79 @@ class AddMemberBottomSheet extends StatefulWidget {
 }
 
 class _AddMemberBottomSheetState extends State<AddMemberBottomSheet> {
-  final _memberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final List<String> _members = [];
+  final UserService _userService = UserService();
+  String? _error;
+  bool _isLoading = false;
 
   @override
   void dispose() {
-    _memberController.dispose();
+    _emailController.dispose();
     super.dispose();
+  }
+
+  Future<void> _addMember() async {
+    final email = _emailController.text.trim();
+
+    // Kiểm tra email rỗng
+    if (email.isEmpty) {
+      setState(() {
+        _error = 'Vui lòng nhập email';
+      });
+      return;
+    }
+
+    // Kiểm tra định dạng email
+    final emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    if (!emailRegExp.hasMatch(email)) {
+      setState(() {
+        _error = 'Email không đúng định dạng';
+      });
+      return;
+    }
+
+    // Kiểm tra email đã tồn tại trong danh sách
+    if (_members.contains(email)) {
+      setState(() {
+        _error = 'Email đã được thêm';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final exists = await _userService.checkEmailExists(email);
+      if (exists) {
+        setState(() {
+          _members.add(email);
+          _emailController.clear();
+          _error = null;
+        });
+      } else {
+        setState(() {
+          _error = 'Email không tồn tại trong hệ thống';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _error = 'Có lỗi xảy ra, vui lòng thử lại';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _removeMember(String email) {
+    setState(() {
+      _members.remove(email);
+    });
   }
 
   @override
@@ -28,116 +95,85 @@ class _AddMemberBottomSheetState extends State<AddMemberBottomSheet> {
       padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Thêm thành viên',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
+          const Text(
+            'Thêm thành viên',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
-                child: TextFormField(
-                  controller: _memberController,
-                  decoration: const InputDecoration(
-                    labelText: 'Email thành viên',
-                    border: OutlineInputBorder(),
-                    hintText: 'Nhập email thành viên',
+                child: TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    errorText: _error,
+                    border: const OutlineInputBorder(),
                   ),
+                  onSubmitted: (_) => _addMember(),
                 ),
               ),
               const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: () {
-                  if (_memberController.text.isNotEmpty) {
-                    setState(() {
-                      _members.add(_memberController.text);
-                      _memberController.clear();
-                    });
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue,
-                ),
-                child: const Text(
-                  'Thêm',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: _addMember,
+                    ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Hoặc tải file lên',
-            style: TextStyle(
-              color: Colors.blue[700],
-              decoration: TextDecoration.underline,
-            ),
-          ),
+          const SizedBox(height: 16),
           if (_members.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.3,
+            const Text(
+              'Danh sách thành viên:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
               ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: _members.length,
-                separatorBuilder: (context, index) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(_members[index]),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          _members.removeAt(index);
-                        });
-                      },
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  );
-                },
-              ),
+            ),
+            const SizedBox(height: 8),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _members.length,
+              itemBuilder: (context, index) {
+                final email = _members[index];
+                return ListTile(
+                  title: Text(email),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.remove_circle_outline),
+                    color: Colors.red,
+                    onPressed: () => _removeMember(email),
+                  ),
+                );
+              },
             ),
           ],
           const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                widget.onMembersAdded(_members);
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.blue,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Hủy'),
               ),
-              child: const Text(
-                'Xác nhận',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                ),
+              ElevatedButton(
+                onPressed: _members.isEmpty
+                    ? null
+                    : () {
+                        widget.onMembersAdded(_members);
+                        Navigator.pop(context);
+                      },
+                child: const Text('Thêm'),
               ),
-            ),
+            ],
           ),
         ],
       ),
     );
   }
-} 
+}

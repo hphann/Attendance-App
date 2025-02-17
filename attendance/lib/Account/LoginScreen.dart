@@ -1,7 +1,7 @@
-import 'package:attendance/Account/ForgotPasswordScreen.dart';
-import 'package:attendance/Account/SignUpScreen.dart';
-import 'package:attendance/Account/UpdateInfoScreen.dart';
-import 'package:attendance/Screens/MainScreen.dart';
+import 'package:attendance/account/ForgotPasswordScreen.dart';
+import 'package:attendance/account/SignUpScreen.dart';
+import 'package:attendance/account/UpdateInfoScreen.dart';
+import 'package:attendance/Screens/main_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';

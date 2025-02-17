@@ -1,8 +1,8 @@
-import 'package:attendance/Screens/MainScreen.dart';
+import 'package:attendance/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:attendance/Account/LoginScreen.dart';
+import 'package:attendance/account/LoginScreen.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';

@@ -39,7 +39,6 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
 
     // Sử dụng URL mặc định nếu biến môi trường không được thiết lập
     _apiUrl ??= 'https://attendance-7f16.onrender.com/api/qr/scan';
-    print('API URL: $_apiUrl'); // In URL API để kiểm tra
   }
 
   Future<void> _initializeScanner() async {
@@ -112,18 +111,16 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
       // Giải mã và kiểm tra dữ liệu QR
       try {
         final decodedData = jsonDecode(qrData);
-        // Tiến hành gửi yêu cầu API
       } catch (e) {
         _showDialog(
           'Lỗi',
           'Dữ liệu mã QR không hợp lệ!',
           Colors.red,
-          Icons.cancel, // Biểu tượng lỗi
+          Icons.cancel,
         );
         return;
       }
 
-      // Gửi yêu cầu đến API
       final response = await http.post(
         Uri.parse(_apiUrl!),
         headers: {'Content-Type': 'application/json'},
@@ -143,7 +140,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
           'Điểm danh thành công!',
           'Bạn đã điểm danh thành công!',
           Colors.blue,
-          Icons.check_circle, // Biểu tượng thành công
+          Icons.check_circle,
         );
       } else {
         final responseBody = jsonDecode(response.body);
@@ -151,7 +148,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
           'Lỗi',
           'Lỗi: ${responseBody['message']}',
           Colors.red,
-          Icons.cancel, // Biểu tượng lỗi
+          Icons.cancel,
         );
       }
     } catch (error) {
@@ -162,7 +159,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
         'Lỗi',
         'Không thể kết nối đến server! $error',
         Colors.red,
-        Icons.cancel, // Biểu tượng lỗi
+        Icons.cancel,
       );
     } finally {
       if (scannerController != null) {
@@ -185,7 +182,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
               Icon(
                 icon,
                 size: 100,
-                color: color, // Đổi màu biểu tượng theo trạng thái
+                color: color,
               ),
               SizedBox(height: 10),
               Text(

@@ -1,5 +1,3 @@
-import '../utils/date_utils.dart';
-
 class User {
   final String? id;
   final String name;
@@ -9,8 +7,6 @@ class User {
   final bool disabled;
   final String? role;
   final String? avatarUrl;
-  // final DateTime? createdAt;
-  // final DateTime? updatedAt;
 
   User({
     this.id,
@@ -21,8 +17,6 @@ class User {
     this.disabled = false,
     this.role,
     this.avatarUrl,
-    // this.createdAt,
-    // this.updatedAt,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -39,13 +33,10 @@ class User {
       name: json['displayName']?.toString() ?? json['name']?.toString() ?? '',
       gender: json['gender']?.toString() ?? 'Nam',
       email: json['email']?.toString() ?? '',
-      // Update this line to correctly get phone number
       phone: formatPhoneNumber(json['phoneNumber']?.toString() ?? json['phone']?.toString() ?? ''),
       disabled: json['disabled'] ?? false,
       role: json['role']?.toString(),
       avatarUrl: json['avatarUrl']?.toString(),
-      // createdAt: parseDateTimeFromJson(json['createdAt']),
-      // updatedAt: parseDateTimeFromJson(json['updatedAt']),
     );
   }
 

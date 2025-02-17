@@ -1,9 +1,9 @@
+import 'package:attendance/attendance/qr_scanner.dart';
 import 'package:flutter/material.dart';
-import 'LeaveScreen.dart';
-import 'AccountScreen.dart';
-import '../Attendance/QrScanner.dart';
-import 'EventScreen.dart';
-import 'HomeScreen.dart';
+import 'leave_screen.dart';
+import 'account_screen.dart';
+import 'event_screen.dart';
+import 'home_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
