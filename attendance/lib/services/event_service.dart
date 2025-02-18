@@ -110,7 +110,13 @@ class EventService {
         final data = response.data;
         if (data['success'] == true && data['data'] != null) {
           final eventsList = data['data'] as List;
-          return eventsList.map((e) => Event.fromJson(e)).toList();
+          return eventsList.map((json) {
+            try {
+              return Event.fromJson(json);
+            } catch (e) {
+              throw Exception('Lỗi khi phân tích sự kiện: $e');
+            }
+          }).toList();
         }
         throw Exception(data['message'] ?? 'Lấy danh sách sự kiện thất bại');
       }
@@ -118,6 +124,8 @@ class EventService {
       throw Exception('Lấy danh sách sự kiện thất bại');
     } on DioException catch (e) {
       throw Exception('Lỗi khi lấy danh sách sự kiện: ${e.message}');
+    } catch (e) {
+      throw Exception('Lỗi khi lấy danh sách sự kiện: $e');
     }
   }
 

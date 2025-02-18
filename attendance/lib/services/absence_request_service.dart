@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AbsenceRequestService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'https://attendance-7f16.onrender.com/api',
+    baseUrl: 'http://10.0.2.2:3000/api',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -68,6 +68,31 @@ class AbsenceRequestService {
       }
     } on DioException catch (e) {
       throw Exception('Lỗi khi cập nhật trạng thái: ${e.message}');
+    }
+  }
+
+  Future<List<AbsenceRequest>> getCreatorRequests() async {
+    try {
+      await _setUserId();
+      final userId = _dio.options.headers['userId'];
+      if (userId == null) {
+        throw Exception('Không tìm thấy thông tin người dùng');
+      }
+
+      final response = await _dio.get('/absence-requests/creator/$userId');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          return (data['data'] as List)
+              .map((json) => AbsenceRequest.fromJson(json))
+              .toList();
+        }
+        throw Exception(data['message'] ?? 'Lấy danh sách yêu cầu thất bại');
+      }
+      throw Exception('Lấy danh sách yêu cầu thất bại');
+    } catch (e) {
+      throw Exception('Lỗi khi lấy danh sách yêu cầu: $e');
     }
   }
 }

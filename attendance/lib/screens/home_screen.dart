@@ -26,8 +26,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadEvents() async {
-    await context.read<EventProvider>().fetchUserEvents();
-    _calculateTodayStatistics();
+    try {
+      await context.read<EventProvider>().fetchUserEvents();
+      if (mounted) {
+        _calculateTodayStatistics();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    }
   }
 
   void _calculateTodayStatistics() {

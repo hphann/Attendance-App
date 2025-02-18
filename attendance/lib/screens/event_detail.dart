@@ -515,8 +515,7 @@ class _EventDetailState extends State<EventDetail> {
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                       trailing: _buildParticipantStatus(participant.userId),
-                      onLongPress: () =>
-                          _showDeleteParticipantDialog(participant),
+                      onLongPress: () => _showDeleteParticipantDialog(participant),
                       onTap: () => _showParticipantOptions(participant),
                     );
                   },

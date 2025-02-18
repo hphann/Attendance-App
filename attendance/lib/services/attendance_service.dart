@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 class AttendanceService {
   // Thay đổi baseUrl để match với địa chỉ thật của server
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api', // Nếu dùng Android Emulator
+    baseUrl: 'https://attendance-7f16.onrender.com/api', // Nếu dùng Android Emulator
     // hoặc
     // baseUrl: 'http://localhost:3000/api', // Nếu dùng web
     // hoặc

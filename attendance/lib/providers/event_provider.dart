@@ -101,22 +101,24 @@ class EventProvider with ChangeNotifier {
 
       final prefs = await SharedPreferences.getInstance();
       _userId = prefs.getString('userId');
-      if (_userId == null) return;
+      if (_userId == null) {
+        _error = 'Không tìm thấy thông tin người dùng';
+        _isLoading = false;
+        notifyListeners();
+        return;
+      }
 
       final events = await _service.getUserEvents();
       _events = events;
+      _error = null;
 
-      // Reset attendance status map
+      // Reset và cập nhật attendance status
       _attendanceStatus.clear();
-
-      // Lấy thông tin điểm danh cho mỗi sự kiện
       for (var event in events) {
         if (event.id != null) {
           try {
             final attendances =
                 await _attendanceService.getEventAttendance(event.id!);
-            print(
-                'Attendances for event ${event.id}: $attendances'); // Debug log
 
             // Tìm attendance của user hiện tại
             final userAttendance = attendances.firstWhere(
@@ -124,10 +126,6 @@ class EventProvider with ChangeNotifier {
               orElse: () => null,
             );
 
-            print(
-                'User $_userId attendance for event ${event.id}: $userAttendance'); // Debug log
-
-            // Chỉ lưu attendance nếu thực sự tìm thấy
             if (userAttendance != null) {
               _attendanceStatus[event.id!] =
                   Attendance.fromJson(userAttendance);

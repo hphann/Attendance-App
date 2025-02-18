@@ -73,4 +73,21 @@ class AbsenceRequestProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> fetchCreatorRequests() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      _eventRequests = await _service.getCreatorRequests();
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
