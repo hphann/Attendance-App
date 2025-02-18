@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:attendance/attendance/attendance_methods_create.dart';
 import 'package:attendance/widgets/attendance_history_card.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +7,13 @@ import 'package:attendance/screens/event_leave_requests_screen.dart';
 import 'package:attendance/models/event.dart';
 import 'package:attendance/models/event_participant.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
+import 'package:http/http.dart' as http;
+
 
 class EventDetail extends StatefulWidget {
   final Event event;
@@ -546,6 +551,7 @@ class _EventDetailState extends State<EventDetail> {
         _showEditEventDialog();
         break;
       case 'export':
+      // Gọi hàm hiển thị dialog
         _exportEventReport();
         break;
       case 'delete':
@@ -732,23 +738,6 @@ class _EventDetailState extends State<EventDetail> {
     }
   }
 
-  void _exportEventReport() {
-    // TODO: Implement export report
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xuất báo cáo'),
-        content: const Text('Tính năng đang được phát triển'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Đóng'),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _showDeleteConfirmation() {
     showDialog(
       context: context,
@@ -784,6 +773,186 @@ class _EventDetailState extends State<EventDetail> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: ${e.toString()}')),
+      );
+    }
+  }
+
+  void _exportEventReport() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        DateTime? selectedStartDate;
+        DateTime? selectedEndDate;
+        String selectedFormat = 'excel';
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Row(
+                children: const [
+                  Icon(Icons.file_download, color: Colors.blueAccent),
+                  SizedBox(width: 8),
+                  Text('Xuất báo cáo', style: TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildDateSelector(
+                      title: 'Ngày bắt đầu',
+                      selectedDate: selectedStartDate,
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2022),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() => selectedStartDate = picked);
+                        }
+                      },
+                    ),
+                    Divider(),
+                    _buildDateSelector(
+                      title: 'Ngày kết thúc',
+                      selectedDate: selectedEndDate,
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2022),
+                          lastDate: DateTime(2100),
+                        );
+                        if (picked != null) {
+                          setState(() => selectedEndDate = picked);
+                        }
+                      },
+                    ),
+                    Divider(),
+                    // ListTile(
+                    //   leading: Icon(Icons.format_list_bulleted),
+                    //   title: const Text('Định dạng báo cáo'),
+                    //   trailing: DropdownButton<String>(
+                    //     value: selectedFormat,
+                    //     items: const [
+                    //       DropdownMenuItem(value: 'excel', child: Text('Excel')),
+                    //       DropdownMenuItem(value: 'pdf', child: Text('PDF')),
+                    //     ],
+                    //     onChanged: (value) {
+                    //       if (value != null) {
+                    //         setState(() => selectedFormat = value);
+                    //       }
+                    //     },
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Hủy', style: TextStyle(color: Colors.redAccent)),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (selectedStartDate == null || selectedEndDate == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Vui lòng chọn đủ ngày bắt đầu và kết thúc')),
+                      );
+                      return;
+                    }
+                    await _downloadReportFile(
+                      startDate: selectedStartDate!,
+                      endDate: selectedEndDate!,
+                      format: 'pdf',
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Xuất', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDateSelector({
+    required String title,
+    required DateTime? selectedDate,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(Icons.calendar_today, color: Colors.blueAccent),
+      title: Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(
+        selectedDate == null ? 'Chưa chọn' : DateFormat('dd/MM/yyyy').format(selectedDate),
+        style: TextStyle(color: Colors.grey[600]),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+      onTap: onTap,
+    );
+  }
+
+  Future<void> _downloadReportFile({
+    required DateTime startDate,
+    required DateTime endDate,
+    required String format,
+  }) async {
+    final eventId = widget.event.id;
+    if (eventId == null) return;
+
+    final startStr = startDate.toIso8601String();
+    final endStr = endDate
+        .add(const Duration(hours: 23, minutes: 59, seconds: 59))
+        .toIso8601String();
+
+    final url =
+        'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final dir = await getTemporaryDirectory();
+        final extension = (format == 'excel') ? 'xlsx' : 'pdf';
+        final filePath = '${dir.path}/report_$eventId.$extension';
+        final file = File(filePath);
+
+        await file.writeAsBytes(bytes);
+
+        try {
+          await OpenFile.open(filePath);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi khi mở file: ${e.toString()}')),
+          );
+        }
+      } else {
+        // In ra toàn bộ nội dung response để debug
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi khi xuất báo cáo: ${response.statusCode} - ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
       );
     }
   }
