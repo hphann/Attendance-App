@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Attendance {
   final String? id;
   final String userId;
@@ -62,4 +64,51 @@ class Attendance {
         'note': note,
         // 'userName': userName,
       };
+
+  // Thêm hàm helper để chuyển đổi status thành text hiển thị
+  static String getStatusText(String? status) {
+    if (status == null) return 'Chưa điểm danh';
+    
+    switch (status.toLowerCase()) {
+      case 'attendance':
+        return 'Có mặt';
+      case 'late':
+        return 'Đi muộn';
+      case 'absent':
+        return 'Vắng mặt';
+      default:
+        return 'Chưa điểm danh';
+    }
+  }
+
+  // Thêm hàm helper để lấy màu tương ứng với status
+  static Color getStatusColor(String? status) {
+    if (status == null) return Colors.grey.shade50;
+
+    switch (status.toLowerCase()) {
+      case 'attendance':
+        return Colors.green.shade50;
+      case 'late':
+        return Colors.orange.shade50;
+      case 'absent':
+        return Colors.red.shade50;
+      default:
+        return Colors.grey.shade50;
+    }
+  }
+
+  static Color getStatusTextColor(String? status) {
+    if (status == null) return Colors.grey.shade700;
+
+    switch (status.toLowerCase()) {
+      case 'attendance':
+        return Colors.green.shade700;
+      case 'late':
+        return Colors.orange.shade700;
+      case 'absent':
+        return Colors.red.shade700;
+      default:
+        return Colors.grey.shade700;
+    }
+  }
 }

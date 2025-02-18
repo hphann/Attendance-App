@@ -146,7 +146,7 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
                         .pop(); // Đóng loading
                     Navigator.of(context, rootNavigator: true)
                         .pop(); // Đóng dialog
-                    _showSuccessPopup(context, result['session_id']);
+                    _showSuccessPopup(context, result['sessionId']);
                     // Navigator.pop(context, result);
                   }
                 } catch (e) {

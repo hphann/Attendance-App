@@ -52,9 +52,9 @@ class _QrGeneratorState extends State<QrGenerator> {
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "event_id": widget.eventId,
-          "valid_minutes": expireMinutes,
-          "session_time": sessionTime,
+          "eventId": widget.eventId,
+          "validMinutes": expireMinutes,
+          "sessionTime": sessionTime,
         }),
       );
 
@@ -64,7 +64,7 @@ class _QrGeneratorState extends State<QrGenerator> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          qrImage = base64Decode(_getBase64Data(data["qr_code"]));
+          qrImage = base64Decode(_getBase64Data(data["qrCode"]));
           expireTime = DateTime.now().add(Duration(minutes: expireMinutes));
           startCountdown();
         });

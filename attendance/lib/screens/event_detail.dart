@@ -12,6 +12,8 @@ import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:attendance/services/attendance_service.dart';
+import 'package:attendance/models/attendance.dart';
 
 class EventDetail extends StatefulWidget {
   final Event event;
@@ -24,11 +26,14 @@ class EventDetail extends StatefulWidget {
 
 class _EventDetailState extends State<EventDetail> {
   int selectedTab = 0;
+  Map<String, Attendance> _attendanceData = {};
+  final AttendanceService _attendanceService = AttendanceService();
 
   @override
   void initState() {
     super.initState();
     _loadParticipants();
+    _loadAttendanceData();
   }
 
   Future<void> _loadParticipants() async {
@@ -36,6 +41,23 @@ class _EventDetailState extends State<EventDetail> {
       await context
           .read<EventParticipantProvider>()
           .getEventParticipants(widget.event.id!);
+    }
+  }
+
+  Future<void> _loadAttendanceData() async {
+    try {
+      if (widget.event.id != null) {
+        final attendances =
+            await _attendanceService.getEventAttendance(widget.event.id!);
+        setState(() {
+          _attendanceData = {
+            for (var attendance in attendances)
+              attendance['userId'] as String: Attendance.fromJson(attendance)
+          };
+        });
+      }
+    } catch (e) {
+      print('Error loading attendance data: $e');
     }
   }
 
@@ -456,7 +478,7 @@ class _EventDetailState extends State<EventDetail> {
                         participant.userInfo?['email'] ?? '',
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
-                      trailing: _buildParticipantStatus(participant.status),
+                      trailing: _buildParticipantStatus(participant.userId),
                     );
                   },
                 ),
@@ -467,43 +489,20 @@ class _EventDetailState extends State<EventDetail> {
     );
   }
 
-  Widget _buildParticipantStatus(String status) {
-    Color backgroundColor;
-    Color textColor;
-    String text;
-
-    switch (status.toLowerCase()) {
-      case 'accepted':
-        backgroundColor = Colors.green.shade50;
-        textColor = Colors.green.shade700;
-        text = 'Đã tham gia';
-        break;
-      case 'pending':
-        backgroundColor = Colors.orange.shade50;
-        textColor = Colors.orange.shade700;
-        text = 'Chờ xác nhận';
-        break;
-      case 'declined':
-        backgroundColor = Colors.red.shade50;
-        textColor = Colors.red.shade700;
-        text = 'Từ chối';
-        break;
-      default:
-        backgroundColor = Colors.grey.shade50;
-        textColor = Colors.grey.shade700;
-        text = 'Không xác định';
-    }
+  Widget _buildParticipantStatus(String userId) {
+    final attendance = _attendanceData[userId];
+    final status = attendance?.status;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: Attendance.getStatusColor(status),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
-        text,
+        Attendance.getStatusText(status),
         style: TextStyle(
-          color: textColor,
+          color: Attendance.getStatusTextColor(status),
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
@@ -932,7 +931,9 @@ class _EventDetailState extends State<EventDetail> {
                         }
                       },
                     ),
-                    if (selectedStartDate != null && selectedEndDate != null && selectedEndDate!.isBefore(selectedStartDate!))
+                    if (selectedStartDate != null &&
+                        selectedEndDate != null &&
+                        selectedEndDate!.isBefore(selectedStartDate!))
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
@@ -963,7 +964,8 @@ class _EventDetailState extends State<EventDetail> {
                       trailing: DropdownButton<String>(
                         value: selectedFormat,
                         items: const [
-                          DropdownMenuItem(value: 'excel', child: Text('Excel')),
+                          DropdownMenuItem(
+                              value: 'excel', child: Text('Excel')),
                           DropdownMenuItem(value: 'pdf', child: Text('PDF')),
                         ],
                         onChanged: (value) {
@@ -1001,7 +1003,9 @@ class _EventDetailState extends State<EventDetail> {
 
                     if (selectedEndDate!.isBefore(selectedStartDate!)) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Lỗi: Ngày kết thúc phải sau ngày bắt đầu!')),
+                        const SnackBar(
+                            content: Text(
+                                'Lỗi: Ngày kết thúc phải sau ngày bắt đầu!')),
                       );
                       return;
                     }
@@ -1023,7 +1027,6 @@ class _EventDetailState extends State<EventDetail> {
       },
     );
   }
-
 
   Widget _buildDateSelector({
     required String title,
@@ -1057,7 +1060,6 @@ class _EventDetailState extends State<EventDetail> {
         .add(const Duration(hours: 23, minutes: 59, seconds: 59))
         .toUtc()
         .toIso8601String();
-
 
     final url =
         'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
