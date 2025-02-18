@@ -8,7 +8,7 @@ import 'package:attendance/providers/event_participant_provider.dart';
 class DetailScreen extends StatefulWidget {
   final Map<String, dynamic> eventData;
 
-  const DetailScreen({Key? key, required this.eventData}) : super(key: key);
+  const DetailScreen({super.key, required this.eventData});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();

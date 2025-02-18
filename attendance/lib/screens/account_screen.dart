@@ -5,8 +5,6 @@ import 'package:attendance/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
-import 'package:attendance/models/user.dart';
-import 'package:attendance/services/user_service.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/user_provider.dart';
 
