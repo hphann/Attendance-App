@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/user_provider.dart';
+import 'package:attendance/providers/absence_request_provider.dart';
 
 class AbsenceRegistrationScreen extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -33,16 +34,12 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // TODO: Implement absence request submission
-      // final user = context.read<UserProvider>().user;
-      // final request = AbsenceRequest(
-      //   userId: user!.id!,
-      //   eventId: widget.eventData['id'],
-      //   reason: _reasonController.text,
-      // );
+      final requestData = {
+        'eventId': widget.eventData['id'],
+        'reason': _reasonController.text,
+      };
 
-      // Giả lập delay network
-      await Future.delayed(const Duration(seconds: 1));
+      await context.read<AbsenceRequestProvider>().createRequest(requestData);
 
       if (!mounted) return;
 
@@ -72,13 +69,19 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[100],
       appBar: AppBar(
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: Colors.black),
         title: const Text(
           'Đăng ký vắng mặt',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Colors.blue,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -87,63 +90,117 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Event Info Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.eventData['className'],
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.eventData['name'] ?? 'Không có tên',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(height: 8),
-                      Text('Thời gian: ${widget.eventData['time']}'),
-                      Text('Địa điểm: ${widget.eventData['location']}'),
-                      Text('Người tổ chức: ${widget.eventData['organizer']}'),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildInfoRow(
+                      icon: Icons.access_time,
+                      label: 'Thời gian',
+                      value: widget.eventData['time'] ?? 'Chưa cập nhật',
+                    ),
+                    _buildInfoRow(
+                      icon: Icons.location_on,
+                      label: 'Địa điểm',
+                      value: widget.eventData['location'] ?? 'Chưa cập nhật',
+                    ),
+                    _buildInfoRow(
+                      icon: Icons.person,
+                      label: 'Người tổ chức',
+                      value: widget.eventData['organizer'] ?? 'Chưa cập nhật',
+                    ),
+                  ],
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Reason Input
-              const Text(
-                'Lý do vắng mặt',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _reasonController,
-                maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Nhập lý do vắng mặt...',
-                  border: OutlineInputBorder(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Lý do vắng mặt',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: _reasonController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Nhập lý do vắng mặt...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: Colors.blue),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey.shade50,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Vui lòng nhập lý do vắng mặt';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Vui lòng nhập lý do vắng mặt';
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 24),
-
-              // Submit Button
-              SizedBox(
-                width: double.infinity,
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4),
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _submitForm,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size(double.infinity, 50),
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -160,6 +217,7 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                 ),
@@ -167,6 +225,44 @@ class _AbsenceRegistrationScreenState extends State<AbsenceRegistrationScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Colors.blue),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

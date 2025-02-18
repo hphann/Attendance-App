@@ -74,7 +74,7 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
 
       await _service.deleteEvent(eventId);
-      
+
       // Xóa sự kiện khỏi danh sách local
       _events.removeWhere((event) => event.id == eventId);
 
@@ -85,6 +85,24 @@ class EventProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       rethrow;
+    }
+  }
+
+  Future<void> fetchUserEvents() async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      final events = await _service.getUserEvents();
+      _events = events;
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
     }
   }
 }

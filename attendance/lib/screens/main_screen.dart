@@ -67,11 +67,11 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.event_note_outlined),
-            label: 'Sự kiện',
+            label: 'Sự kiện của tôi',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.qr_code_scanner),
-            label: 'Quét mã',
+            label: 'Quét mã QR',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.work_off_outlined),
@@ -79,7 +79,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outlined),
-            label: 'Hồ sơ',
+            label: 'Hồ sơ của tôi',
           ),
         ],
         currentIndex: _currentIndex,

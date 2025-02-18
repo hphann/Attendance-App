@@ -215,7 +215,10 @@ class _EventScreenState extends State<EventScreen> {
 
   Widget _buildEventCard(Event event) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 2,
+      color: Colors.blue[50],
+      margin: const EdgeInsets.only(bottom: 16.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -230,7 +233,7 @@ class _EventScreenState extends State<EventScreen> {
           });
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -239,6 +242,7 @@ class _EventScreenState extends State<EventScreen> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
+                  color: Colors.black87,
                 ),
               ),
               const SizedBox(height: 8),
@@ -249,11 +253,27 @@ class _EventScreenState extends State<EventScreen> {
                   const SizedBox(width: 8),
                   Text(
                     '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}',
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(color: Colors.black87),
                   ),
+                  const Spacer(),
+                  if (_selectedTab != 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(event.getStatus()),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        _getStatusText(event.getStatus()),
+                        style: TextStyle(
+                          color: _getStatusTextColor(event.getStatus()),
+                        ),
+                      ),
+                    ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   const Icon(Icons.calendar_today,
@@ -261,33 +281,82 @@ class _EventScreenState extends State<EventScreen> {
                   const SizedBox(width: 8),
                   Text(
                     DateFormat('dd/MM/yyyy').format(event.startTime),
-                    style: const TextStyle(fontSize: 14),
+                    style: const TextStyle(color: Colors.black87),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Row(
                 children: [
                   const Icon(Icons.location_on,
                       size: 16, color: Colors.black54),
                   const SizedBox(width: 8),
-                  Text(event.location),
+                  Expanded(
+                    child: Text(
+                      event.location,
+                      style: const TextStyle(color: Colors.black87),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
-              if (event.participants != null) ...[
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.people, size: 16, color: Colors.black54),
-                    const SizedBox(width: 8),
-                    Text('${event.participants!.length} thành viên'),
-                  ],
-                ),
-              ],
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.person, size: 16, color: Colors.black54),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      event.createdByUser?['name'] ?? 'Unknown',
+                      style: const TextStyle(color: Colors.black87),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'upcoming':
+        return Colors.blue.shade50;
+      case 'active':
+        return Colors.green.shade50;
+      case 'completed':
+        return Colors.grey.shade50;
+      default:
+        return Colors.grey.shade50;
+    }
+  }
+
+  Color _getStatusTextColor(String status) {
+    switch (status) {
+      case 'upcoming':
+        return Colors.blue.shade700;
+      case 'active':
+        return Colors.green.shade700;
+      case 'completed':
+        return Colors.grey.shade700;
+      default:
+        return Colors.grey.shade700;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'upcoming':
+        return 'Sắp diễn ra';
+      case 'active':
+        return 'Đang diễn ra';
+      case 'completed':
+        return 'Đã kết thúc';
+      default:
+        return 'Không xác định';
+    }
   }
 }

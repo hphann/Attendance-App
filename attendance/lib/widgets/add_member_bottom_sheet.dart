@@ -92,88 +92,130 @@ class _AddMemberBottomSheetState extends State<AddMemberBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Thêm thành viên',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          TextField(
+            controller: _emailController,
+            decoration: InputDecoration(
+              hintText: 'Nhập email thành viên',
+              errorText: _error,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              prefixIcon: const Icon(Icons.email, color: Colors.blue),
+              suffixIcon: _isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(12.0),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : IconButton(
+                      icon: const Icon(Icons.add, color: Colors.blue),
+                      onPressed: _addMember,
+                    ),
             ),
+            onSubmitted: (_) => _addMember(),
           ),
-          const SizedBox(height: 16),
+          if (_members.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.people, size: 20, color: Colors.blue),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Danh sách thành viên (${_members.length})',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _members
+                        .map((email) => _buildEmailChip(email))
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 24),
           Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: _emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    errorText: _error,
-                    border: const OutlineInputBorder(),
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    side: const BorderSide(color: Colors.blue),
                   ),
-                  onSubmitted: (_) => _addMember(),
+                  child: const Text('Hủy'),
                 ),
               ),
-              const SizedBox(width: 8),
-              _isLoading
-                  ? const CircularProgressIndicator()
-                  : IconButton(
-                      icon: const Icon(Icons.add),
-                      onPressed: _addMember,
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _members.isEmpty
+                      ? null
+                      : () {
+                          widget.onMembersAdded(_members);
+                          Navigator.pop(context);
+                        },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (_members.isNotEmpty) ...[
-            const Text(
-              'Danh sách thành viên:',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _members.length,
-              itemBuilder: (context, index) {
-                final email = _members[index];
-                return ListTile(
-                  title: Text(email),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.remove_circle_outline),
-                    color: Colors.red,
-                    onPressed: () => _removeMember(email),
                   ),
-                );
-              },
-            ),
-          ],
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Hủy'),
-              ),
-              ElevatedButton(
-                onPressed: _members.isEmpty
-                    ? null
-                    : () {
-                        widget.onMembersAdded(_members);
-                        Navigator.pop(context);
-                      },
-                child: const Text('Thêm'),
+                  child: const Text('Thêm thành viên'),
+                ),
               ),
             ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildEmailChip(String email) {
+    return Chip(
+      label: Text(
+        email,
+        style: TextStyle(
+          color: Colors.blue.shade700,
+          fontSize: 13,
+        ),
+      ),
+      backgroundColor: Colors.blue.shade50,
+      deleteIcon: Icon(
+        Icons.close,
+        size: 18,
+        color: Colors.blue.shade700,
+      ),
+      onDeleted: () => _removeMember(email),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
     );
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:attendance/attendance/attendance_methods_create.dart';
-import 'package:attendance/widgets/attendance_history_card.dart';
 import 'package:flutter/material.dart';
 import 'package:attendance/widgets/add_member_bottom_sheet.dart';
 import 'package:attendance/screens/event_leave_requests_screen.dart';
@@ -13,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
 import 'package:http/http.dart' as http;
-
 
 class EventDetail extends StatefulWidget {
   final Event event;
@@ -57,29 +55,58 @@ class _EventDetailState extends State<EventDetail> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => Padding(
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: 20,
+          left: 20,
+          right: 20,
         ),
-        child: AddMemberBottomSheet(
-          onMembersAdded: (List<String> emails) async {
-            try {
-              await context
-                  .read<EventParticipantProvider>()
-                  .addParticipants(widget.event.id!, emails);
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Thêm thành viên',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            AddMemberBottomSheet(
+              onMembersAdded: (List<String> emails) async {
+                try {
+                  await context
+                      .read<EventParticipantProvider>()
+                      .addParticipants(widget.event.id!, emails);
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Thêm thành viên thành công')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Lỗi: ${e.toString()}')),
-              );
-            }
-          },
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Thêm thành viên thành công')),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Lỗi: ${e.toString()}')),
+                  );
+                }
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -88,7 +115,7 @@ class _EventDetailState extends State<EventDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[100],
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
@@ -147,49 +174,7 @@ class _EventDetailState extends State<EventDetail> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.event.name,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.blue.shade50,
-                    radius: 16,
-                    child: Text(
-                      widget.event.createdByUser?['email']?[0].toUpperCase() ??
-                          '',
-                      style: TextStyle(
-                        color: Colors.blue.shade700,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Tạo bởi: ${widget.event.createdByUser?['name'] ?? 'Unknown'}',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              _buildInfoRow(
-                'Thời gian:',
-                '${DateFormat('HH:mm dd/MM/yyyy').format(widget.event.startTime)} - '
-                    '${DateFormat('HH:mm dd/MM/yyyy').format(widget.event.endTime)}',
-              ),
-              _buildInfoRow(
-                'Số người tham gia:',
-                '${widget.event.participants?.length ?? 0} thành viên',
-              ),
-              _buildInfoRow('Địa điểm:', widget.event.location),
+              _buildEventInfo(),
               const SizedBox(height: 20),
               _buildActionButtons(context),
               const SizedBox(height: 20),
@@ -201,28 +186,118 @@ class _EventDetailState extends State<EventDetail> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
+  Widget _buildEventInfo() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  widget.event.name,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(widget.event.getStatus()),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  _getStatusText(widget.event.getStatus()),
+                  style: TextStyle(
+                    color: _getStatusTextColor(widget.event.getStatus()),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildInfoItem(
+            icon: Icons.person,
+            title: 'Người tổ chức',
+            content: widget.event.createdByUser?['name'] ?? 'Unknown',
+          ),
+          _buildInfoItem(
+            icon: Icons.access_time,
+            title: 'Thời gian',
+            content:
+                '${DateFormat('HH:mm').format(widget.event.startTime)} - ${DateFormat('HH:mm').format(widget.event.endTime)}',
+          ),
+          _buildInfoItem(
+            icon: Icons.calendar_today,
+            title: 'Ngày',
+            content: DateFormat('dd/MM/yyyy').format(widget.event.startTime),
+          ),
+          _buildInfoItem(
+            icon: Icons.location_on,
+            title: 'Địa điểm',
+            content: widget.event.location,
+          ),
+          if (widget.event.description.isNotEmpty)
+            _buildInfoItem(
+              icon: Icons.description,
+              title: 'Mô tả',
+              content: widget.event.description,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoItem({
+    required IconData icon,
+    required String title,
+    required String content,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 180,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: Colors.black54,
-                fontSize: 16,
-              ),
-            ),
-          ),
+          Icon(icon, size: 20, color: Colors.blue),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 16,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -302,92 +377,137 @@ class _EventDetailState extends State<EventDetail> {
 
         final participants = provider.participants;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Danh sách thành viên',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.person_add, color: Colors.blue),
-                  onPressed: _showAddMemberBottomSheet,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            if (participants.isEmpty)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Chưa có thành viên nào',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16,
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Danh sách thành viên (${participants.length})',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              )
-            else
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: participants.length,
-                separatorBuilder: (context, index) => const Divider(),
-                itemBuilder: (context, index) {
-                  final participant = participants[index];
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue.shade50,
-                      child: Text(
-                        participant.userInfo?['name']?[0].toUpperCase() ??
-                            participant.userInfo?['email']?[0].toUpperCase() ??
-                            'U',
-                        style: TextStyle(
-                          color: Colors.blue.shade700,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  IconButton(
+                    icon: const Icon(Icons.person_add, color: Colors.blue),
+                    onPressed: _showAddMemberBottomSheet,
+                    tooltip: 'Thêm thành viên',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              if (participants.isEmpty)
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.people_outline,
+                          size: 48, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Chưa có thành viên nào tham gia',
+                        style: TextStyle(color: Colors.grey),
                       ),
-                    ),
-                    title: Text(
-                      participant.userInfo?['name'] ??
-                          participant.userInfo?['email'] ??
-                          'Unknown User',
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          participant.userInfo?['role'] ?? 'Thành viên',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                        Text(
-                          'Trạng thái: ${participant.status}',
+                    ],
+                  ),
+                )
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: participants.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final participant = participants[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.blue.shade50,
+                        child: Text(
+                          (participant.userInfo?['name'] ?? 'U')[0]
+                              .toUpperCase(),
                           style: TextStyle(
-                            color: participant.status == 'active'
-                                ? Colors.green
-                                : Colors.orange,
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      onPressed: () => _showParticipantOptions(participant),
-                    ),
-                  );
-                },
-              ),
-          ],
+                      ),
+                      title: Text(
+                        participant.userInfo?['name'] ?? 'Unknown',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      subtitle: Text(
+                        participant.userInfo?['email'] ?? '',
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      trailing: _buildParticipantStatus(participant.status),
+                    );
+                  },
+                ),
+            ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildParticipantStatus(String status) {
+    Color backgroundColor;
+    Color textColor;
+    String text;
+
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        backgroundColor = Colors.green.shade50;
+        textColor = Colors.green.shade700;
+        text = 'Đã tham gia';
+        break;
+      case 'pending':
+        backgroundColor = Colors.orange.shade50;
+        textColor = Colors.orange.shade700;
+        text = 'Chờ xác nhận';
+        break;
+      case 'declined':
+        backgroundColor = Colors.red.shade50;
+        textColor = Colors.red.shade700;
+        text = 'Từ chối';
+        break;
+      default:
+        backgroundColor = Colors.grey.shade50;
+        textColor = Colors.grey.shade700;
+        text = 'Không xác định';
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 
@@ -500,49 +620,43 @@ class _EventDetailState extends State<EventDetail> {
     );
   }
 
-  Color _getStatusColor(AttendanceStatus status) {
+  Color _getStatusColor(String status) {
     switch (status) {
-      case AttendanceStatus.notYet:
-        return Colors.orange;
-      case AttendanceStatus.present:
-        return Colors.green;
-      case AttendanceStatus.absent:
-        return Colors.red;
-      case AttendanceStatus.late:
-        return Colors.yellow;
-    }
-  }
-
-  String _getStatusText(AttendanceStatus status) {
-    switch (status) {
-      case AttendanceStatus.notYet:
-        return 'Chưa điểm danh';
-      case AttendanceStatus.present:
-        return 'Có mặt';
-      case AttendanceStatus.absent:
-        return 'Vắng mặt';
-      case AttendanceStatus.late:
-        return 'Trễ';
-    }
-  }
-
-  AttendanceStatus _getAttendanceStatus(String status) {
-    switch (status) {
-      case 'present':
-        return AttendanceStatus.present;
-      case 'late':
-        return AttendanceStatus.late;
-      case 'absent':
-        return AttendanceStatus.absent;
+      case 'upcoming':
+        return Colors.blue.shade50;
+      case 'active':
+        return Colors.green.shade50;
+      case 'completed':
+        return Colors.grey.shade50;
       default:
-        return AttendanceStatus.notYet;
+        return Colors.grey.shade50;
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    final time = DateFormat('HH:mm').format(dateTime);
-    final date = DateFormat('dd/MM/yyyy').format(dateTime);
-    return '$time $date';
+  Color _getStatusTextColor(String status) {
+    switch (status) {
+      case 'upcoming':
+        return Colors.blue.shade700;
+      case 'active':
+        return Colors.green.shade700;
+      case 'completed':
+        return Colors.grey.shade700;
+      default:
+        return Colors.grey.shade700;
+    }
+  }
+
+  String _getStatusText(String status) {
+    switch (status) {
+      case 'upcoming':
+        return 'Sắp diễn ra';
+      case 'active':
+        return 'Đang diễn ra';
+      case 'completed':
+        return 'Đã kết thúc';
+      default:
+        return 'Không xác định';
+    }
   }
 
   void _handleMenuAction(String value) async {
@@ -551,7 +665,7 @@ class _EventDetailState extends State<EventDetail> {
         _showEditEventDialog();
         break;
       case 'export':
-      // Gọi hàm hiển thị dialog
+        // Gọi hàm hiển thị dialog
         _exportEventReport();
         break;
       case 'delete':
@@ -795,7 +909,8 @@ class _EventDetailState extends State<EventDetail> {
                 children: const [
                   Icon(Icons.file_download, color: Colors.blueAccent),
                   SizedBox(width: 8),
-                  Text('Xuất báo cáo', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('Xuất báo cáo',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ],
               ),
               content: SingleChildScrollView(
@@ -856,7 +971,8 @@ class _EventDetailState extends State<EventDetail> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Hủy', style: TextStyle(color: Colors.redAccent)),
+                  child: const Text('Hủy',
+                      style: TextStyle(color: Colors.redAccent)),
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -868,7 +984,9 @@ class _EventDetailState extends State<EventDetail> {
                   onPressed: () async {
                     if (selectedStartDate == null || selectedEndDate == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Vui lòng chọn đủ ngày bắt đầu và kết thúc')),
+                        const SnackBar(
+                            content: Text(
+                                'Vui lòng chọn đủ ngày bắt đầu và kết thúc')),
                       );
                       return;
                     }
@@ -879,7 +997,8 @@ class _EventDetailState extends State<EventDetail> {
                     );
                     Navigator.pop(context);
                   },
-                  child: const Text('Xuất', style: TextStyle(color: Colors.white)),
+                  child:
+                      const Text('Xuất', style: TextStyle(color: Colors.white)),
                 ),
               ],
             );
@@ -898,7 +1017,9 @@ class _EventDetailState extends State<EventDetail> {
       leading: Icon(Icons.calendar_today, color: Colors.blueAccent),
       title: Text(title, style: TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text(
-        selectedDate == null ? 'Chưa chọn' : DateFormat('dd/MM/yyyy').format(selectedDate),
+        selectedDate == null
+            ? 'Chưa chọn'
+            : DateFormat('dd/MM/yyyy').format(selectedDate),
         style: TextStyle(color: Colors.grey[600]),
       ),
       trailing: Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
@@ -947,7 +1068,9 @@ class _EventDetailState extends State<EventDetail> {
         print('Response body: ${response.body}');
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi khi xuất báo cáo: ${response.statusCode} - ${response.body}')),
+          SnackBar(
+              content: Text(
+                  'Lỗi khi xuất báo cáo: ${response.statusCode} - ${response.body}')),
         );
       }
     } catch (e) {

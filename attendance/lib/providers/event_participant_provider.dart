@@ -37,7 +37,7 @@ class EventParticipantProvider with ChangeNotifier {
       notifyListeners();
 
       await _service.addParticipants(eventId, userIds);
-      await getEventParticipants(eventId); // Refresh list
+      await getEventParticipants(eventId); 
 
       _isLoading = false;
       notifyListeners();
@@ -58,7 +58,6 @@ class EventParticipantProvider with ChangeNotifier {
 
       await _service.updateParticipant(participantId, data);
 
-      // Cập nhật local state
       final index = _participants.indexWhere((p) => p.id == participantId);
       if (index != -1) {
         _participants[index] = EventParticipant.fromJson({
@@ -85,7 +84,6 @@ class EventParticipantProvider with ChangeNotifier {
 
       await _service.deleteParticipant(participantId);
 
-      // Xóa khỏi local state
       _participants.removeWhere((p) => p.id == participantId);
 
       _isLoading = false;

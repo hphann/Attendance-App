@@ -10,7 +10,6 @@ class Event {
   String location;
   final String createdBy;
   final Map<String, dynamic>? createdByUser;
-
   final String? repeat;
   final List<String>? daysOfWeek;
   final String? time;
@@ -86,7 +85,7 @@ class Event {
       return DateTime.now();
     }
 
-    final event = Event(
+    return Event(
       id: json['id'],
       name: json['name'] ?? '',
       description: json['description'] ?? '',
@@ -107,8 +106,6 @@ class Event {
               .toList()
           : null,
     );
-    print('Parsed Event: ${event.toJson()}');
-    return event;
   }
 
   Map<String, dynamic> toJson() => {
@@ -120,7 +117,6 @@ class Event {
         'location': location,
         'createdBy': createdBy,
         'createdByUser': createdByUser,
-        // 'status': status,
         'repeat': repeat,
         'daysOfWeek': daysOfWeek,
         'time': time,
