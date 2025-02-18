@@ -24,17 +24,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final GlobalKey statusKey = GlobalKey();
   final GlobalKey eventKey = GlobalKey();
 
-  final List<String> eventOptions = [
-    'Lớp Lập Trình Di Động',
-    'Họp Dự Án',
-    'Seminar AI',
-    'Workshop React',
-    'Hội thảo công nghệ',
-    'Họp nhóm dự án',
-    'Workshop Flutter',
-    'Tất cả'
+  final List<String> statusOptions = [
+    'Tất cả',
+    'Có mặt',
+    'Đi muộn',
+    'Vắng mặt'
   ];
-  final List<String> statusOptions = ['Tất cả', 'Đã điểm danh', 'Vắng'];
+  List<String> eventOptions = ['Tất cả'];
 
   final AttendanceService _attendanceService = AttendanceService();
   List<Attendance> attendanceHistory = [];
@@ -90,8 +86,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final history =
           await _attendanceService.getUserAttendanceHistory(userId!);
       if (mounted) {
+        // Cập nhật danh sách sự kiện từ lịch sử điểm danh
+        Set<String> uniqueEvents = {'Tất cả'};
+        for (var attendance in history) {
+          if (attendance.eventInfo?['name'] != null) {
+            uniqueEvents.add(attendance.eventInfo!['name']);
+          }
+        }
+
         setState(() {
           attendanceHistory = history;
+          eventOptions = uniqueEvents.toList();
           isLoading = false;
         });
       }
@@ -105,7 +110,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
   }
 
-  // Lọc dữ liệu theo bộ lọc đã chọn
+  // Sửa lại hàm lọc dữ liệu
   List<Attendance> _getFilteredData() {
     return attendanceHistory.where((attendance) {
       // Lọc theo sự kiện
@@ -114,9 +119,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
           attendance.eventInfo?['name'] == selectedEventFilter;
 
       // Lọc theo trạng thái
-      final matchesStatus = selectedStatusFilter == null ||
-          selectedStatusFilter == 'Tất cả' ||
-          attendance.status == selectedStatusFilter;
+      bool matchesStatus = true;
+      if (selectedStatusFilter != null && selectedStatusFilter != 'Tất cả') {
+        switch (selectedStatusFilter) {
+          case 'Có mặt':
+            matchesStatus = attendance.status == 'attendance';
+            break;
+          case 'Đi muộn':
+            matchesStatus = attendance.status == 'late';
+            break;
+          case 'Vắng mặt':
+            matchesStatus = attendance.status == 'absent';
+            break;
+        }
+      }
 
       // Lọc theo ngày
       final matchesDate = selectedDate == null ||
@@ -126,106 +142,87 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }).toList();
   }
 
+  // Sửa lại hàm build history card
   Widget buildHistoryCard({
-    required Map<String, dynamic> itemData,
+    required Attendance attendance,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 2,
-        color: Colors.blue[50],
-        margin: const EdgeInsets.only(bottom: 16.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                itemData['className'],
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+    String getStatusText(String status) {
+      switch (status.toLowerCase()) {
+        case 'attendance':
+          return 'Có mặt';
+        case 'late':
+          return 'Đi muộn';
+        case 'absent':
+          return 'Vắng mặt';
+        default:
+          return 'Không xác định';
+      }
+    }
+
+    Color getStatusColor(String status) {
+      switch (status.toLowerCase()) {
+        case 'attendance':
+          return Colors.green;
+        case 'late':
+          return Colors.orange;
+        case 'absent':
+          return Colors.red;
+        default:
+          return Colors.grey;
+      }
+    }
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.only(bottom: 16.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: ListTile(
+        onTap: onTap,
+        title: Text(
+          attendance.eventInfo?['name'] ?? 'Không có tên',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.access_time, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(DateFormat('HH:mm dd/MM/yyyy')
+                    .format(attendance.timestamp)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.location_on, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    attendance.eventInfo?['location'] ?? 'Không có địa điểm',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.access_time,
-                      size: 16, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Text(
-                    itemData['time'],
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                  const Spacer(),
-                  if (itemData['status'].isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: itemData['status'] == 'Đã điểm danh'
-                            ? Colors.green[100]
-                            : (itemData['status'] == 'Vắng'
-                                ? Colors.red[100]
-                                : Colors.orange[100]),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: Text(
-                        itemData['status'],
-                        style: TextStyle(
-                          color: itemData['status'] == 'Đã điểm danh'
-                              ? Colors.green[900]
-                              : (itemData['status'] == 'Vắng'
-                                  ? Colors.red[900]
-                                  : Colors.orange[900]),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today, size: 16, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Text(
-                    DateFormat('dd/MM/yyyy', 'vi_VN').format(itemData['date']),
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.location_on, size: 16, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      itemData['location'],
-                      style: const TextStyle(color: Colors.black87),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.person, size: 16, color: Colors.black54),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      itemData['organizer'],
-                      style: const TextStyle(color: Colors.black87),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
+          ],
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: getStatusColor(attendance.status).withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            getStatusText(attendance.status),
+            style: TextStyle(
+              color: getStatusColor(attendance.status),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -337,21 +334,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 itemBuilder: (context, index) {
                                   final attendance = _getFilteredData()[index];
                                   return buildHistoryCard(
-                                    itemData: {
-                                      'className':
-                                          attendance.eventInfo?['name'] ??
-                                              'Không có tên',
-                                      'time': DateFormat('HH:mm')
-                                          .format(attendance.timestamp),
-                                      'date': attendance.timestamp,
-                                      'status': attendance.status,
-                                      'location':
-                                          attendance.eventInfo?['location'] ??
-                                              'Không có địa điểm',
-                                      'organizer':
-                                          attendance.eventInfo?['organizer'] ??
-                                              'Không có thông tin',
-                                    },
+                                    attendance: attendance,
                                     onTap: () => _showDetailDialog(attendance),
                                   );
                                 },

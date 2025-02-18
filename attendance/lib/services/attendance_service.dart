@@ -16,6 +16,7 @@ class AttendanceService {
   Future<List<dynamic>> getEventAttendance(String eventId) async {
     try {
       final response = await _dio.get('/attendance/event/$eventId');
+
       if (response.data['success']) {
         return response.data['data'];
       }

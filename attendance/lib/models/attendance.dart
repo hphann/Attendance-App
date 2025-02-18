@@ -46,8 +46,8 @@ class Attendance {
 
     return Attendance(
       id: json['id'],
-      userId: json['userId'],
-      eventId: json['eventId'],
+      userId: json['user_id'] ?? json['userId'],
+      eventId: json['event_id'] ?? json['eventId'],
       status: json['status'],
       timestamp: parseTimestamp(json['timestamp']),
       note: json['note'],
@@ -68,7 +68,7 @@ class Attendance {
   // Thêm hàm helper để chuyển đổi status thành text hiển thị
   static String getStatusText(String? status) {
     if (status == null) return 'Chưa điểm danh';
-    
+
     switch (status.toLowerCase()) {
       case 'attendance':
         return 'Có mặt';

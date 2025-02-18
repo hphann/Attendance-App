@@ -14,6 +14,7 @@ import 'package:attendance/providers/event_participant_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:attendance/services/attendance_service.dart';
 import 'package:attendance/models/attendance.dart';
+import 'dart:async';
 
 class EventDetail extends StatefulWidget {
   final Event event;
@@ -28,12 +29,39 @@ class _EventDetailState extends State<EventDetail> {
   int selectedTab = 0;
   Map<String, Attendance> _attendanceData = {};
   final AttendanceService _attendanceService = AttendanceService();
+  bool _isLoading = true;
+  Timer? _refreshTimer;
 
   @override
   void initState() {
     super.initState();
-    _loadParticipants();
-    _loadAttendanceData();
+    _initializeData();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (mounted) {
+        _loadAttendanceData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _initializeData() async {
+    try {
+      await Future.wait([
+        _loadParticipants(),
+        _loadAttendanceData(),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> _loadParticipants() async {
@@ -49,12 +77,15 @@ class _EventDetailState extends State<EventDetail> {
       if (widget.event.id != null) {
         final attendances =
             await _attendanceService.getEventAttendance(widget.event.id!);
-        setState(() {
-          _attendanceData = {
-            for (var attendance in attendances)
-              attendance['userId'] as String: Attendance.fromJson(attendance)
-          };
-        });
+
+        if (mounted) {
+          setState(() {
+            _attendanceData = {
+              for (var attendance in attendances)
+                attendance['user_id'] as String: Attendance.fromJson(attendance)
+            };
+          });
+        }
       }
     } catch (e) {
       print('Error loading attendance data: $e');
@@ -70,7 +101,9 @@ class _EventDetailState extends State<EventDetail> {
       builder: (context) => AttendanceMethodsSheet2(
         eventId: widget.event.id!,
       ),
-    );
+    ).then((_) {
+      _loadAttendanceData();
+    });
   }
 
   void _showAddMemberBottomSheet() {
@@ -190,18 +223,21 @@ class _EventDetailState extends State<EventDetail> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildEventInfo(),
-              const SizedBox(height: 20),
-              _buildActionButtons(context),
-              const SizedBox(height: 20),
-              _buildMemberList(),
-            ],
+      body: RefreshIndicator(
+        onRefresh: refreshData,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildEventInfo(),
+                const SizedBox(height: 20),
+                _buildActionButtons(context),
+                const SizedBox(height: 20),
+                _buildMemberList(),
+              ],
+            ),
           ),
         ),
       ),
@@ -376,7 +412,7 @@ class _EventDetailState extends State<EventDetail> {
   Widget _buildMemberList() {
     return Consumer<EventParticipantProvider>(
       builder: (context, provider, child) {
-        if (provider.isLoading) {
+        if (provider.isLoading || _isLoading) {
           return const Center(
             child: Padding(
               padding: EdgeInsets.all(16.0),
@@ -479,6 +515,9 @@ class _EventDetailState extends State<EventDetail> {
                         style: TextStyle(color: Colors.grey.shade600),
                       ),
                       trailing: _buildParticipantStatus(participant.userId),
+                      onLongPress: () =>
+                          _showDeleteParticipantDialog(participant),
+                      onTap: () => _showParticipantOptions(participant),
                     );
                   },
                 ),
@@ -491,8 +530,10 @@ class _EventDetailState extends State<EventDetail> {
 
   Widget _buildParticipantStatus(String userId) {
     final attendance = _attendanceData[userId];
-    final status = attendance?.status;
+    print(
+        'Building status for user $userId: ${attendance?.status}'); // Log status của từng user
 
+    final status = attendance?.status;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -664,7 +705,6 @@ class _EventDetailState extends State<EventDetail> {
         _showEditEventDialog();
         break;
       case 'export':
-        // Gọi hàm hiển thị dialog
         _exportEventReport();
         break;
       case 'delete':
@@ -1099,5 +1139,12 @@ class _EventDetailState extends State<EventDetail> {
         SnackBar(content: Text('Lỗi: $e')),
       );
     }
+  }
+
+  Future<void> refreshData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await _initializeData();
   }
 }
