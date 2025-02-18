@@ -85,14 +85,21 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          title: Row(
+          title: const Row(
             children: [
               Icon(Icons.check_circle, color: Colors.green),
               SizedBox(width: 10),
-              Text('Xác nhận tạo điểm danh',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Expanded( // Cho phép Text co giãn trong Row
+                child: Text(
+                  'Xác nhận tạo điểm danh',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2, // Giới hạn 2 dòng để tránh bị cắt
+                  overflow: TextOverflow.ellipsis, // Hiển thị dấu "..." nếu quá dài
+                ),
+              ),
             ],
           ),
+
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
