@@ -4,10 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class EventService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api',
+    baseUrl:
+    // 'http://10.0.2.2:3000/api',
     // Nếu chạy trên thiết bị thật, dùng IP của máy tính
     // baseUrl: 'http://192.168.1.xxx:3000/api',
-    // 'https://attendance-7f16.onrender.com/api'
+    'https://attendance-7f16.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },
