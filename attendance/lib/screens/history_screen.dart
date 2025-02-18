@@ -174,55 +174,112 @@ class _HistoryScreenState extends State<HistoryScreen> {
     }
 
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 16.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: InkWell(
         onTap: onTap,
-        title: Text(
-          attendance.eventInfo?['name'] ?? 'Không có tên',
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(DateFormat('HH:mm dd/MM/yyyy')
-                    .format(attendance.timestamp)),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    attendance.eventInfo?['location'] ?? 'Không có địa điểm',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.event,
+                      color: Colors.blue.shade700,
+                      size: 24,
+                    ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          attendance.eventInfo?['name'] ?? 'Không có tên',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.access_time,
+                                size: 14, color: Colors.grey.shade600),
+                            const SizedBox(width: 4),
+                            Text(
+                              DateFormat('HH:mm dd/MM/yyyy')
+                                  .format(attendance.timestamp),
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: getStatusColor(attendance.status).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color:
+                            getStatusColor(attendance.status).withOpacity(0.5),
+                      ),
+                    ),
+                    child: Text(
+                      getStatusText(attendance.status),
+                      style: TextStyle(
+                        color: getStatusColor(attendance.status),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              if (attendance.eventInfo?['location'] != null) ...[
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Icon(Icons.location_on,
+                        size: 14, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        attendance.eventInfo!['location'],
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        ),
-        trailing: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: getStatusColor(attendance.status).withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            getStatusText(attendance.status),
-            style: TextStyle(
-              color: getStatusColor(attendance.status),
-              fontWeight: FontWeight.bold,
-            ),
+            ],
           ),
         ),
       ),
@@ -351,30 +408,102 @@ class _HistoryScreenState extends State<HistoryScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(attendance.eventInfo?['name'] ?? 'Chi tiết điểm danh'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.info_outline, color: Colors.blue.shade700),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                attendance.eventInfo?['name'] ?? 'Chi tiết điểm danh',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-                'Thời gian: ${DateFormat('HH:mm dd/MM/yyyy').format(attendance.timestamp)}'),
-            const SizedBox(height: 8),
-            Text('Trạng thái: ${attendance.status}'),
+            _buildDetailRow(
+              Icons.access_time,
+              'Thời gian điểm danh',
+              DateFormat('HH:mm dd/MM/yyyy').format(attendance.timestamp),
+            ),
+            const SizedBox(height: 12),
+            _buildDetailRow(
+              Icons.how_to_reg,
+              'Trạng thái',
+              Attendance.getStatusText(attendance.status),
+              color: Attendance.getStatusTextColor(attendance.status),
+            ),
             if (attendance.note != null) ...[
-              const SizedBox(height: 8),
-              Text('Ghi chú: ${attendance.note}'),
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                Icons.note,
+                'Ghi chú',
+                attendance.note!,
+              ),
             ],
-            const SizedBox(height: 8),
-            Text('Địa điểm: ${attendance.eventInfo?['location'] ?? 'N/A'}'),
+            if (attendance.eventInfo?['location'] != null) ...[
+              const SizedBox(height: 12),
+              _buildDetailRow(
+                Icons.location_on,
+                'Địa điểm',
+                attendance.eventInfo!['location'],
+              ),
+            ],
           ],
         ),
         actions: [
           TextButton(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             onPressed: () => Navigator.pop(context),
             child: const Text('Đóng'),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value,
+      {Color? color}) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.grey.shade600),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: color ?? Colors.black87,
+                  fontWeight:
+                      color != null ? FontWeight.w600 : FontWeight.normal,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

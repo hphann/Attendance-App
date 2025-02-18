@@ -26,7 +26,7 @@ class _EventScreenState extends State<EventScreen> {
   Future<void> _fetchEvents() async {
     setState(() => _isLoading = true);
     try {
-      await context.read<EventProvider>().fetchEvents();
+      await context.read<EventProvider>().fetchEventsByCreator();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: ${e.toString()}')),

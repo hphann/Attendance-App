@@ -1,3 +1,4 @@
+import 'package:attendance/models/attendance.dart';
 import 'package:attendance/models/event.dart';
 import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/screens/detail_screen.dart';
@@ -14,6 +15,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int selectedTab = 0;
+  int totalEventsToday = 0;
+  int attendedEventsToday = 0;
+  int upcomingEventsToday = 0;
 
   @override
   void initState() {
@@ -23,6 +27,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadEvents() async {
     await context.read<EventProvider>().fetchUserEvents();
+    _calculateTodayStatistics();
+  }
+
+  void _calculateTodayStatistics() {
+    final events = context.read<EventProvider>().events;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Lọc các sự kiện trong ngày
+    final todayEvents = events.where((event) {
+      final eventDate = DateTime(
+        event.startTime.year,
+        event.startTime.month,
+        event.startTime.day,
+      );
+      return eventDate.isAtSameMomentAs(today);
+    }).toList();
+
+    // Đếm số sự kiện đã điểm danh
+    int attended = 0;
+    for (var event in todayEvents) {
+      final attendance =
+          context.read<EventProvider>().getAttendanceStatus(event.id ?? '');
+      if (attendance != null) {
+        attended++;
+      }
+    }
+
+    // Đếm số sự kiện sắp diễn ra
+    final upcoming =
+        todayEvents.where((event) => event.startTime.isAfter(now)).length;
+
+    setState(() {
+      totalEventsToday = todayEvents.length;
+      attendedEventsToday = attended;
+      upcomingEventsToday = upcoming;
+    });
   }
 
   List<Event> getFilteredEvents() {
@@ -83,8 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 10),
               buildAttendanceSummary(),
-              const SizedBox(height: 5),
-              buildAttendanceSummary2(),
               const SizedBox(height: 20),
               buildTabs(),
               const SizedBox(height: 20),
@@ -121,85 +160,84 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildAttendanceSummary() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        buildSummaryCard(
-          title: 'Đã điểm danh',
-          value: '15',
-          color: Colors.green[100]!,
-        ),
-        const SizedBox(width: 5),
-        buildSummaryCard(
-          title: 'Vắng',
-          value: '2',
-          color: Colors.red[100]!,
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            icon: Icons.event,
+            value: totalEventsToday.toString(),
+            label: 'Tổng sự kiện',
+            color: Colors.blue,
+          ),
+          _buildStatItem(
+            icon: Icons.check_circle,
+            value: attendedEventsToday.toString(),
+            label: 'Đã điểm danh',
+            color: Colors.green,
+          ),
+          _buildStatItem(
+            icon: Icons.upcoming,
+            value: upcomingEventsToday.toString(),
+            label: 'Sắp diễn ra',
+            color: Colors.orange,
+          ),
+        ],
+      ),
     );
   }
 
-  Widget buildAttendanceSummary2() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        buildSummaryCard(
-          title: 'Chưa điểm danh',
-          value: '3',
-          color: Colors.orange[100]!,
-        ),
-        const SizedBox(width: 5),
-        buildSummaryCard(
-          title: 'Tổng buổi học',
-          value: '20',
-          color: Colors.blue[100]!,
-        ),
-      ],
-    );
-  }
-
-  Widget buildSummaryCard({
-    required String title,
+  Widget _buildStatItem({
+    required IconData icon,
     required String value,
+    required String label,
     required Color color,
   }) {
-    return Expanded(
-      child: Card(
-        elevation: 2,
-        color: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 24,
           ),
         ),
-      ),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey.shade600,
+          ),
+        ),
+      ],
     );
   }
 
@@ -243,6 +281,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget buildAttendanceCard({required Event event}) {
+    // Thay đổi từ read sang watch để cập nhật UI khi có thay đổi
+    final attendance =
+        context.watch<EventProvider>().getAttendanceStatus(event.id ?? '');
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -282,13 +324,61 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                event.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      event.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  // Hiển thị trạng thái điểm danh
+                  if (attendance != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Attendance.getStatusColor(attendance.status),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Attendance.getStatusColor(attendance.status)
+                              .withOpacity(0.5),
+                        ),
+                      ),
+                      child: Text(
+                        Attendance.getStatusText(attendance.status),
+                        style: TextStyle(
+                          color:
+                              Attendance.getStatusTextColor(attendance.status),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    )
+                  else if (!event.isCompleted())
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Text(
+                        'Chưa điểm danh',
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(height: 8),
               Row(

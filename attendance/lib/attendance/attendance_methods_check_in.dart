@@ -7,10 +7,12 @@ import 'button_check_in.dart';
 
 class AttendanceMethodsSheet extends StatelessWidget {
   final String eventId;
+  final VoidCallback? onAttendanceComplete;
 
   const AttendanceMethodsSheet({
     Key? key,
     required this.eventId,
+    this.onAttendanceComplete,
   }) : super(key: key);
 
   @override
@@ -74,5 +76,10 @@ class AttendanceMethodsSheet extends StatelessWidget {
         borderRadius: BorderRadius.circular(3),
       ),
     );
+  }
+
+  void _handleAttendanceSuccess(BuildContext context) {
+    onAttendanceComplete?.call();
+    Navigator.pop(context);
   }
 }

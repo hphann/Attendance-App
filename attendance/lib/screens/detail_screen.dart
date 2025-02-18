@@ -1,9 +1,11 @@
+import 'package:attendance/models/attendance.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/attendance/attendance_methods_check_in.dart';
 import 'package:attendance/screens/absence_registration_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
+import 'package:attendance/providers/event_provider.dart';
 
 class DetailScreen extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -16,11 +18,13 @@ class DetailScreen extends StatefulWidget {
 
 class _DetailScreenState extends State<DetailScreen> {
   int selectedTab = 0;
+  Attendance? _userAttendance;
 
   @override
   void initState() {
     super.initState();
     _loadParticipants();
+    _loadAttendanceStatus();
   }
 
   Future<void> _loadParticipants() async {
@@ -28,6 +32,17 @@ class _DetailScreenState extends State<DetailScreen> {
       await context
           .read<EventParticipantProvider>()
           .getEventParticipants(widget.eventData['id']);
+    }
+  }
+
+  Future<void> _loadAttendanceStatus() async {
+    if (widget.eventData['id'] != null) {
+      final attendance = context
+          .read<EventProvider>()
+          .getAttendanceStatus(widget.eventData['id']);
+      setState(() {
+        _userAttendance = attendance;
+      });
     }
   }
 
@@ -39,6 +54,9 @@ class _DetailScreenState extends State<DetailScreen> {
       ),
       builder: (context) => AttendanceMethodsSheet(
         eventId: widget.eventData['id'],
+        onAttendanceComplete: () {
+          _updateAttendanceStatus();
+        },
       ),
     );
   }
@@ -180,6 +198,17 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
+  void _updateAttendanceStatus() {
+    if (widget.eventData['id'] != null) {
+      final attendance = context
+          .read<EventProvider>()
+          .getAttendanceStatus(widget.eventData['id']);
+      setState(() {
+        _userAttendance = attendance;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -281,22 +310,46 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                 ),
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(widget.eventData['status'] ?? ''),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _getStatusText(widget.eventData['status'] ?? ''),
-                  style: TextStyle(
-                    color:
-                        _getStatusTextColor(widget.eventData['status'] ?? ''),
-                    fontWeight: FontWeight.w500,
+              if (_userAttendance != null)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Attendance.getStatusColor(_userAttendance!.status),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: Attendance.getStatusColor(_userAttendance!.status)
+                          .withOpacity(0.5),
+                    ),
+                  ),
+                  child: Text(
+                    Attendance.getStatusText(_userAttendance!.status),
+                    style: TextStyle(
+                      color: Attendance.getStatusTextColor(
+                          _userAttendance!.status),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                )
+              else if (!isEventCompleted(widget.eventData, DateTime.now()))
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Text(
+                    'Chưa điểm danh',
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 20),

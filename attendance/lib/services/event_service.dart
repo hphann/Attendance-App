@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class EventService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'http://10.0.2.2:3000/api',
+    baseUrl: 'https://attendance-7f16.onrender.com/api',
     // Nếu chạy trên thiết bị thật, dùng IP của máy tính
     // baseUrl: 'http://192.168.1.xxx:3000/api',
     // 'https://attendance-7f16.onrender.com/api'
@@ -105,6 +105,31 @@ class EventService {
       }
 
       final response = await _dio.get('/events/user/$userId');
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final eventsList = data['data'] as List;
+          return eventsList.map((e) => Event.fromJson(e)).toList();
+        }
+        throw Exception(data['message'] ?? 'Lấy danh sách sự kiện thất bại');
+      }
+
+      throw Exception('Lấy danh sách sự kiện thất bại');
+    } on DioException catch (e) {
+      throw Exception('Lỗi khi lấy danh sách sự kiện: ${e.message}');
+    }
+  }
+
+  Future<List<Event>> getEventsByCreator() async {
+    try {
+      await _setUserId();
+      final userId = _dio.options.headers['userId'];
+      if (userId == null) {
+        throw Exception('Không tìm thấy thông tin người dùng');
+      }
+
+      final response = await _dio.get('/events/creator/$userId');
 
       if (response.statusCode == 200) {
         final data = response.data;

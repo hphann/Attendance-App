@@ -64,6 +64,10 @@ class Event {
     }
   }
 
+  bool isCompleted() {
+    return endTime.isBefore(DateTime.now());
+  }
+
   factory Event.fromJson(Map<String, dynamic> json) {
     print('Parsing Event JSON: $json');
     DateTime parseDate(dynamic value) {
