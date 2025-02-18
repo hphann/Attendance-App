@@ -126,7 +126,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'qrData': qrData,
-          'userId': userId,
+          'user_id': userId,
           'note': _noteController.text,
         }),
       );
