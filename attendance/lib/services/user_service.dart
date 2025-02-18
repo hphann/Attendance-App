@@ -1,7 +1,6 @@
 import 'package:attendance/models/user.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   final Dio _dio = Dio(BaseOptions(
