@@ -892,13 +892,13 @@ class _EventDetailState extends State<EventDetail> {
   }
 
   void _exportEventReport() {
+    DateTime? selectedStartDate;
+    DateTime? selectedEndDate;
+    String selectedFormat = 'excel';
+
     showDialog(
       context: context,
       builder: (context) {
-        DateTime? selectedStartDate;
-        DateTime? selectedEndDate;
-        String selectedFormat = 'excel';
-
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -923,7 +923,7 @@ class _EventDetailState extends State<EventDetail> {
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: selectedStartDate ?? DateTime.now(),
                           firstDate: DateTime(2022),
                           lastDate: DateTime(2100),
                         );
@@ -932,6 +932,14 @@ class _EventDetailState extends State<EventDetail> {
                         }
                       },
                     ),
+                    if (selectedStartDate != null && selectedEndDate != null && selectedEndDate!.isBefore(selectedStartDate!))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          '⚠ Ngày kết thúc không thể trước ngày bắt đầu!',
+                          style: TextStyle(color: Colors.red, fontSize: 14),
+                        ),
+                      ),
                     Divider(),
                     _buildDateSelector(
                       title: 'Ngày kết thúc',
@@ -939,7 +947,7 @@ class _EventDetailState extends State<EventDetail> {
                       onTap: () async {
                         final picked = await showDatePicker(
                           context: context,
-                          initialDate: DateTime.now(),
+                          initialDate: selectedEndDate ?? DateTime.now(),
                           firstDate: DateTime(2022),
                           lastDate: DateTime(2100),
                         );
@@ -949,22 +957,22 @@ class _EventDetailState extends State<EventDetail> {
                       },
                     ),
                     Divider(),
-                    // ListTile(
-                    //   leading: Icon(Icons.format_list_bulleted),
-                    //   title: const Text('Định dạng báo cáo'),
-                    //   trailing: DropdownButton<String>(
-                    //     value: selectedFormat,
-                    //     items: const [
-                    //       DropdownMenuItem(value: 'excel', child: Text('Excel')),
-                    //       DropdownMenuItem(value: 'pdf', child: Text('PDF')),
-                    //     ],
-                    //     onChanged: (value) {
-                    //       if (value != null) {
-                    //         setState(() => selectedFormat = value);
-                    //       }
-                    //     },
-                    //   ),
-                    // ),
+                    ListTile(
+                      leading: Icon(Icons.format_list_bulleted),
+                      title: const Text('Định dạng báo cáo'),
+                      trailing: DropdownButton<String>(
+                        value: selectedFormat,
+                        items: const [
+                          DropdownMenuItem(value: 'excel', child: Text('Excel')),
+                          DropdownMenuItem(value: 'pdf', child: Text('PDF')),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => selectedFormat = value);
+                          }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -990,10 +998,18 @@ class _EventDetailState extends State<EventDetail> {
                       );
                       return;
                     }
+
+                    if (selectedEndDate!.isBefore(selectedStartDate!)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Lỗi: Ngày kết thúc phải sau ngày bắt đầu!')),
+                      );
+                      return;
+                    }
+
                     await _downloadReportFile(
                       startDate: selectedStartDate!,
                       endDate: selectedEndDate!,
-                      format: 'pdf',
+                      format: selectedFormat,
                     );
                     Navigator.pop(context);
                   },
@@ -1007,6 +1023,7 @@ class _EventDetailState extends State<EventDetail> {
       },
     );
   }
+
 
   Widget _buildDateSelector({
     required String title,
@@ -1035,10 +1052,12 @@ class _EventDetailState extends State<EventDetail> {
     final eventId = widget.event.id;
     if (eventId == null) return;
 
-    final startStr = startDate.toIso8601String();
+    final startStr = startDate.toUtc().toIso8601String();
     final endStr = endDate
         .add(const Duration(hours: 23, minutes: 59, seconds: 59))
+        .toUtc()
         .toIso8601String();
+
 
     final url =
         'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';

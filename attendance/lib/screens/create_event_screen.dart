@@ -1,8 +1,11 @@
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/services/user_service.dart';
+import 'dart:convert';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({Key? key}) : super(key: key);
@@ -121,8 +124,8 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'repeat': _selectedRepeat,
         'daysOfWeek': _selectedRepeat == 'Hằng tuần'
             ? _weekDays
-                .where((day) => _selectedDays[_weekDays.indexOf(day)])
-                .toList()
+            .where((day) => _selectedDays[_weekDays.indexOf(day)])
+            .toList()
             : null,
         'members': _members,
       };
@@ -209,6 +212,67 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
+  Future<void> _loadMembersFromFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv', 'txt', 'json'], // Các định dạng file hỗ trợ
+      );
+
+      if (result != null && result.files.isNotEmpty) {
+        PlatformFile file = result.files.first;
+        final filePath = file.path;
+
+        if (filePath != null) {
+          final fileContent = await File(filePath).readAsString();
+
+          List<String> newMembers = [];
+          if (file.extension == 'json') {
+            // Xử lý file JSON
+            List<dynamic> decodedJson = jsonDecode(fileContent);
+            newMembers = decodedJson.map((item) => item.toString()).toList();
+          } else {
+            // Xử lý file CSV hoặc TXT (giả sử mỗi dòng là một email)
+            newMembers = fileContent
+                .split('\n')
+                .map((line) => line.trim())
+                .where((email) => email.isNotEmpty)
+                .toList();
+          }
+
+          // Kiểm tra và thêm các thành viên mới
+          for (String email in newMembers) {
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                .hasMatch(email)) {
+              print('Bỏ qua email không hợp lệ: $email');
+              continue; // Bỏ qua email không hợp lệ
+            }
+
+            if (_members.contains(email)) {
+              print('Bỏ qua email đã tồn tại: $email');
+              continue; // Bỏ qua email đã tồn tại
+            }
+
+            // Kiểm tra email có tồn tại trong hệ thống hay không (tối ưu để tránh gọi API nhiều)
+            final exists = await _userService.checkEmailExists(email);
+            if (exists) {
+              _members.add(email);
+            } else {
+              print('Email không tồn tại: $email');
+            }
+          }
+
+          setState(() {});
+        }
+      }
+    } catch (e) {
+      print('Lỗi tải file: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi tải file: ${e.toString()}')),
+      );
+    }
+  }
+
   Widget _buildMemberSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -242,23 +306,26 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               child: _isCheckingEmail
                   ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
                   : const Text('Thêm', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          'Hoặc tải file lên',
-          style: TextStyle(
-            color: Colors.blue[700],
-            decoration: TextDecoration.underline,
+        GestureDetector(
+          onTap: _loadMembersFromFile, // Gọi hàm tải file
+          child: Text(
+            'Hoặc tải file lên',
+            style: TextStyle(
+              color: Colors.blue[700],
+              decoration: TextDecoration.underline,
+            ),
           ),
         ),
         if (_members.isNotEmpty) ...[
@@ -484,21 +551,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
-                          ),
-                        )
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
                       : const Text(
-                          'Tạo sự kiện',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
+                    'Tạo sự kiện',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],

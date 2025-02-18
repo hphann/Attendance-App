@@ -1,4 +1,4 @@
-// lib/Screens/absence_registration_screen.dart
+// lib/screens/absence_registration_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/user_provider.dart';
