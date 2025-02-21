@@ -95,4 +95,22 @@ class EventParticipantProvider with ChangeNotifier {
       rethrow;
     }
   }
+
+  Future<void> leaveEvent(String eventId) async {
+    try {
+      _isLoading = true;
+      notifyListeners();
+
+      await _service.leaveEvent(eventId);
+      await getEventParticipants(eventId); // Refresh danh sách sau khi rời
+
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

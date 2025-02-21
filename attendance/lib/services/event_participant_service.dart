@@ -83,4 +83,13 @@ class EventParticipantService {
       throw Exception('Lỗi khi xóa thành viên: ${e.message}');
     }
   }
+
+  Future<void> leaveEvent(String eventId) async {
+    try {
+      await _setUserId();
+      await _dio.post('/event-participants/leave/$eventId');
+    } catch (e) {
+      throw Exception('Lỗi khi rời sự kiện: ${e.toString()}');
+    }
+  }
 }

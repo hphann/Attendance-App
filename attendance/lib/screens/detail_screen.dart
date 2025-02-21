@@ -6,6 +6,7 @@ import 'package:attendance/screens/absence_registration_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
 import 'package:attendance/providers/event_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailScreen extends StatefulWidget {
   final Map<String, dynamic> eventData;
@@ -19,12 +20,21 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   int selectedTab = 0;
   Attendance? _userAttendance;
+  String? userId;
 
   @override
   void initState() {
     super.initState();
     _loadParticipants();
     _loadAttendanceStatus();
+    _loadUserId();
+  }
+
+  Future<void> _loadUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('userId');
+    });
   }
 
   Future<void> _loadParticipants() async {
@@ -227,34 +237,52 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: Colors.black),
-            onSelected: (value) {
-              // Xử lý menu action ở đây
-            },
-            itemBuilder: (BuildContext context) => [
-              const PopupMenuItem(
-                value: 'edit',
-                child: Row(
-                  children: [
-                    Icon(Icons.edit, color: Colors.blue),
-                    SizedBox(width: 8),
-                    Text('Chỉnh sửa'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'export',
-                child: Row(
-                  children: [
-                    Icon(Icons.download, color: Colors.green),
-                    SizedBox(width: 8),
-                    Text('Xuất báo cáo'),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          if (widget.eventData['createdBy'] != userId)
+            IconButton(
+              icon: const Icon(Icons.exit_to_app, color: Colors.red),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Xác nhận'),
+                    content: const Text(
+                        'Bạn có chắc chắn muốn rời sự kiện này không?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Hủy'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Rời',
+                            style: TextStyle(color: Colors.red)),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true && mounted) {
+                  try {
+                    await context
+                        .read<EventParticipantProvider>()
+                        .leaveEvent(widget.eventData['id']);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                            content: Text('Đã rời sự kiện thành công')),
+                      );
+                      Navigator.pop(context);
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Lỗi: ${e.toString()}')),
+                      );
+                    }
+                  }
+                }
+              },
+            ),
         ],
       ),
       body: SingleChildScrollView(
