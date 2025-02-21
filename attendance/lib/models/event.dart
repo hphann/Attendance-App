@@ -74,7 +74,7 @@ class Event {
       if (value == null) return DateTime.now();
       if (value is String) {
         try {
-          return DateTime.parse(value).toLocal();
+          return DateTime.parse(value);
         } catch (e) {
           print('Error parsing date: $e');
           return DateTime.now();
@@ -82,8 +82,7 @@ class Event {
       }
       if (value is Map) {
         if (value['_seconds'] != null) {
-          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000)
-              .toLocal();
+          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
         }
       }
       return DateTime.now();

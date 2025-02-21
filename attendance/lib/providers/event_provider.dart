@@ -9,12 +9,14 @@ class EventProvider with ChangeNotifier {
   final EventService _service = EventService();
   final AttendanceService _attendanceService = AttendanceService();
   String? _userId;
-  List<Event> _events = [];
+  List<Event> _userEvents = []; // Sự kiện user tham gia
+  List<Event> _createdEvents = []; // Sự kiện user tạo
   bool _isLoading = false;
   String? _error;
   Map<String, Attendance> _attendanceStatus = {};
 
-  List<Event> get events => _events;
+  List<Event> get userEvents => _userEvents;
+  List<Event> get createdEvents => _createdEvents;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -25,7 +27,7 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
 
       final event = await _service.createEvent(eventData);
-      _events.add(event);
+      _createdEvents.add(event);
 
       _isLoading = false;
       notifyListeners();
@@ -44,7 +46,7 @@ class EventProvider with ChangeNotifier {
       notifyListeners();
 
       final events = await _service.getEvents();
-      _events = events;
+      _createdEvents = events;
 
       _isLoading = false;
       notifyListeners();
@@ -82,7 +84,7 @@ class EventProvider with ChangeNotifier {
       await _service.deleteEvent(eventId);
 
       // Xóa sự kiện khỏi danh sách local
-      _events.removeWhere((event) => event.id == eventId);
+      _createdEvents.removeWhere((event) => event.id == eventId);
 
       _isLoading = false;
       notifyListeners();
@@ -109,7 +111,7 @@ class EventProvider with ChangeNotifier {
       }
 
       final events = await _service.getUserEvents();
-      _events = events;
+      _userEvents = events;
       _error = null;
 
       // Reset và cập nhật attendance status
@@ -119,8 +121,6 @@ class EventProvider with ChangeNotifier {
           try {
             final attendances =
                 await _attendanceService.getEventAttendance(event.id!);
-
-            // Tìm attendance của user hiện tại
             final userAttendance = attendances.firstWhere(
               (a) => a['user_id'] == _userId,
               orElse: () => null,
@@ -145,14 +145,14 @@ class EventProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchEventsByCreator() async {
+  Future<void> fetchCreatedEvents() async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
       final events = await _service.getEventsByCreator();
-      _events = events;
+      _createdEvents = events;
 
       _isLoading = false;
       notifyListeners();

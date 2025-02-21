@@ -26,7 +26,7 @@ class _EventScreenState extends State<EventScreen> {
   Future<void> _fetchEvents() async {
     setState(() => _isLoading = true);
     try {
-      await context.read<EventProvider>().fetchEventsByCreator();
+      await context.read<EventProvider>().fetchCreatedEvents();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Lỗi: ${e.toString()}')),
@@ -78,7 +78,8 @@ class _EventScreenState extends State<EventScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final filteredEvents = _getFilteredEvents(eventProvider.events);
+          final filteredEvents =
+              _getFilteredEvents(eventProvider.createdEvents);
 
           return RefreshIndicator(
             onRefresh: _fetchEvents,
@@ -87,7 +88,7 @@ class _EventScreenState extends State<EventScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildStatsSection(eventProvider.events),
+                  _buildStatsSection(eventProvider.createdEvents),
                   const SizedBox(height: 20),
                   _buildTabs(),
                   const SizedBox(height: 20),
