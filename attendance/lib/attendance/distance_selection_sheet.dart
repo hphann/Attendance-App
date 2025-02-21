@@ -89,12 +89,12 @@ class _DistanceSelectionSheetState extends State<DistanceSelectionSheet> {
             children: [
               Icon(Icons.check_circle, color: Colors.green),
               SizedBox(width: 10),
-              Expanded( // Cho phép Text co giãn trong Row
+              Expanded(
                 child: Text(
                   'Xác nhận tạo điểm danh',
                   style: TextStyle(fontWeight: FontWeight.bold),
-                  maxLines: 2, // Giới hạn 2 dòng để tránh bị cắt
-                  overflow: TextOverflow.ellipsis, // Hiển thị dấu "..." nếu quá dài
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

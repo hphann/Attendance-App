@@ -86,12 +86,18 @@ class GpsService {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          title: Row(
+          title: const Row(
             children: const [
               Icon(Icons.vpn_key, color: Colors.blue),
               SizedBox(width: 10),
-              Text("Nhập mã điểm danh GPS",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Expanded(
+                child: Text(
+                  "Nhập mã điểm danh GPS",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
           ),
           content: TextField(
