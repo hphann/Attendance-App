@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:attendance/models/user.dart';
 import 'package:attendance/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:io';
 
 class UserProvider with ChangeNotifier {
   User? _user;
@@ -71,6 +72,28 @@ class UserProvider with ChangeNotifier {
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> uploadAvatar(File imageFile) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      if (_user?.id == null) {
+        throw Exception('Không tìm thấy ID người dùng');
+      }
+
+      await _userService.uploadAvatar(_user!.id!, imageFile);
+      
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
     }
   }
 

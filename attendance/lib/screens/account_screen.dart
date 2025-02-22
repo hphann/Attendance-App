@@ -7,6 +7,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:attendance/providers/user_provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:app_settings/app_settings.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -16,6 +20,154 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _uploadAvatar() async {
+    try {
+      // Kiểm tra quyền truy cập
+      PermissionStatus status;
+      if (Platform.isAndroid) {
+        // Lấy version Android từ chuỗi Platform.version
+        final androidVersion = int.parse(Platform.version.split('.')[0]);
+        if (androidVersion >= 33) {
+          status = await Permission.photos.request();
+        } else {
+          status = await Permission.storage.request();
+        }
+      } else {
+        status = await Permission.storage.request();
+      }
+
+      if (status.isDenied) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Vui lòng cấp quyền truy cập ảnh trong cài đặt để tiếp tục'),
+            ),
+          );
+        }
+        // Mở cài đặt để người dùng có thể cấp quyền
+        await openAppSettings();
+        return;
+      }
+
+      if (status.isPermanentlyDenied) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Cấp quyền truy cập'),
+              content: const Text(
+                  'Để tải lên ảnh đại diện, bạn cần cấp quyền truy cập ảnh trong phần cài đặt của ứng dụng'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Hủy'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    openAppSettings();
+                  },
+                  child: const Text('Mở cài đặt'),
+                ),
+              ],
+            ),
+          );
+        }
+        return;
+      }
+
+      // Nếu đã có quyền, hiển thị bottom sheet để chọn ảnh
+      if (status.isGranted) {
+        showModalBottomSheet(
+          context: context,
+          builder: (BuildContext context) {
+            return SafeArea(
+              child: Wrap(
+                children: <Widget>[
+                  ListTile(
+                    leading: const Icon(Icons.photo_library),
+                    title: const Text('Chọn từ thư viện'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final XFile? image = await _picker.pickImage(
+                        source: ImageSource.gallery,
+                        imageQuality: 50,
+                      );
+                      if (image != null) {
+                        await _processImage(image);
+                      }
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.photo_camera),
+                    title: const Text('Chụp ảnh mới'),
+                    onTap: () async {
+                      Navigator.pop(context);
+                      final XFile? image = await _picker.pickImage(
+                        source: ImageSource.camera,
+                        imageQuality: 50,
+                      );
+                      if (image != null) {
+                        await _processImage(image);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
+  Future<void> _processImage(XFile image) async {
+    try {
+      // Hiển thị loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      );
+
+      // Upload avatar
+      final File imageFile = File(image.path);
+      await context.read<UserProvider>().uploadAvatar(imageFile);
+
+      // Cập nhật lại thông tin user
+      await context.read<UserProvider>().loadUserProfile();
+
+      // Đóng dialog loading
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cập nhật ảnh đại diện thành công')),
+        );
+      }
+    } catch (e) {
+      // Đóng dialog loading nếu có lỗi
+      if (mounted) {
+        Navigator.of(context, rootNavigator: true).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -57,12 +209,35 @@ class _AccountScreenState extends State<AccountScreen> {
                 margin: const EdgeInsets.only(top: 30),
                 child: Column(
                   children: [
-                    CircleAvatar(
-                      radius: 70,
-                      backgroundImage: user.avatarUrl != null
-                          ? NetworkImage(user.avatarUrl!)
-                          : const AssetImage('assets/images/avatar.png')
-                              as ImageProvider,
+                    GestureDetector(
+                      onTap: _uploadAvatar,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 70,
+                            backgroundImage: user.avatarUrl != null
+                                ? NetworkImage(user.avatarUrl!)
+                                : const AssetImage('assets/images/avatar.png')
+                                    as ImageProvider,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                color: Colors.blue,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 10),
                     Text(

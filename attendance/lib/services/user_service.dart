@@ -1,6 +1,8 @@
 import 'package:attendance/models/user.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
 
 class UserService {
   final Dio _dio = Dio(BaseOptions(
@@ -165,6 +167,35 @@ class UserService {
       return false;
     } on DioException catch (e) {
       throw Exception('Lỗi khi kiểm tra email: ${e.message}');
+    }
+  }
+
+  Future<void> uploadAvatar(String userId, File imageFile) async {
+    try {
+      String fileName = imageFile.path.split('/').last;
+      FormData formData = FormData.fromMap({
+        'avatar': await MultipartFile.fromFile(
+          imageFile.path,
+          filename: fileName,
+          contentType: MediaType('image', 'jpeg'), // hoặc 'png' tùy vào định dạng
+        ),
+      });
+
+      final response = await _dio.post(
+        '/users/upload-avatar',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        ),
+      );
+
+      if (!response.data['success']) {
+        throw Exception(response.data['message']);
+      }
+    } catch (e) {
+      throw Exception('Lỗi khi upload ảnh: ${e.toString()}');
     }
   }
 }

@@ -45,36 +45,22 @@ class _HomeScreenState extends State<HomeScreen> {
   void _calculateTodayStatistics() {
     final events = context.read<EventProvider>().userEvents;
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
 
-    // Debug
-    print('Current time: $now');
-    print('All events: ${events.length}');
-    events.forEach((event) {
-      print(
-          'Event: ${event.name}, Start: ${event.startTime}, End: ${event.endTime}');
-    });
-
-    // Lọc sự kiện theo ngày hiện tại
     final todayEvents = events.where((event) {
-      // Kiểm tra xem sự kiện có diễn ra trong ngày hôm nay không
       final eventStart = event.startTime;
       final eventEnd = event.endTime;
       final today = DateTime(now.year, now.month, now.day);
       final tomorrow = today.add(const Duration(days: 1));
 
-      // Sự kiện diễn ra trong ngày nếu:
-      // 1. Bắt đầu trong ngày hôm nay HOẶC
-      // 2. Kết thúc trong ngày hôm nay HOẶC
-      // 3. Bắt đầu trước và kết thúc sau ngày hôm nay
-      return (eventStart.isAfter(today) &&
-              eventStart.isBefore(tomorrow)) || // Bắt đầu hôm nay
-          (eventEnd.isAfter(today) &&
-              eventEnd.isBefore(tomorrow)) || // Kết thúc hôm nay
-          (eventStart.isBefore(today) &&
-              eventEnd.isAfter(tomorrow)); // Kéo dài qua hôm nay
+      print('Event: ${event.name}, Start: $eventStart, End: $eventEnd');
+
+      return event.startTime.isAfter(today) ||
+          (event.startTime.isBefore(now) && event.endTime.isAfter(now)) ||
+          (event.startTime.isBefore(tomorrow) && event.endTime.isAfter(today));
     }).toList();
 
-    // Debug
     print('Today events: ${todayEvents.length}');
     todayEvents.forEach((event) {
       print('Today event: ${event.name}');
@@ -105,6 +91,13 @@ class _HomeScreenState extends State<HomeScreen> {
       completedEventsToday =
           todayEvents.where((event) => event.endTime.isBefore(now)).length;
     });
+
+    // Debug
+    print('Statistics:');
+    print('Total events: $totalEventsToday');
+    print('Attended: $attendedEventsToday');
+    print('Upcoming: $upcomingEventsToday');
+    print('Ongoing: $ongoingEventsToday');
   }
 
   List<Event> getFilteredEvents() {
