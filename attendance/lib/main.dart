@@ -11,15 +11,21 @@ import 'package:attendance/providers/event_provider.dart';
 import 'package:attendance/providers/absence_request_provider.dart';
 import 'package:attendance/providers/event_participant_provider.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  await initializeDateFormatting('vi_VN', null);
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Future<bool> _initializeApp() async {
+    await Future.wait([
+      Firebase.initializeApp(),
+      initializeDateFormatting('vi_VN', null),
+    ]);
+    return true;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +42,17 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: const SplashScreen(),
+        home: FutureBuilder<bool>(
+          future: _initializeApp(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return const SplashScreen();
+            }
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          },
+        ),
       ),
     );
   }
@@ -59,15 +75,12 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-
     bool isLoggedIn = await _checkLoginStatus();
 
+    if (!mounted) return;
     if (isLoggedIn) {
       await context.read<UserProvider>().loadUserProfile();
       if (!mounted) return;
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
@@ -82,7 +95,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<bool> _checkLoginStatus() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('isLoggedIn') ?? false;
   }
 
@@ -95,6 +108,9 @@ class _SplashScreenState extends State<SplashScreen> {
           width: 200,
           height: 200,
           fit: BoxFit.cover,
+          onLoaded: (composition) {
+            Future.delayed(const Duration(seconds: 1), _navigateToNextScreen);
+          },
         ),
       ),
     );
