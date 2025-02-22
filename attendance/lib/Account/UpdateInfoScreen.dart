@@ -1,3 +1,4 @@
+import 'package:attendance/Screens/main_screen.dart';
 import 'package:attendance/screens/home_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class _UpdateInfoScreenState extends State<UpdateInfoScreen> with SingleTickerPr
         // Quay lại màn hình chính
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } else {
         // Người dùng chưa đăng nhập
@@ -156,7 +157,7 @@ class _UpdateInfoScreenState extends State<UpdateInfoScreen> with SingleTickerPr
                       child: Container(
                         padding: EdgeInsets.only(top: 50, bottom: 30),
                         child: Lottie.asset(
-                          'animation/update.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                          'assets/animation/update.json',
                           width: 250,
                           height: 250,
                           repeat: true,  // Nếu muốn lặp lại animation

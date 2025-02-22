@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:attendance/attendance/qr_generator.dart';
 import 'package:attendance/attendance/distance_selection_sheet.dart';
 import 'package:flutter/material.dart';
@@ -38,82 +40,19 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
               context: context,
               icon: Icons.qr_code_scanner,
               label: 'Quét mã QR',
-              onTap: () {
-                Navigator.pop(context);
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  builder: (context) {
-                    return _buildTimeSelectionSheet(context);
-                  },
-                );
-              },
+              onTap: () => _handleQRCode(context),
             ),
           ),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _buildMethodButton(
-              context: context,
-              icon: Icons.gps_fixed,
-              label: 'Điểm danh GPS',
-              onTap: () async {
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: Row(
-                        children: [
-                          const CircularProgressIndicator(),
-                          Container(
-                            margin: const EdgeInsets.only(left: 15),
-                            child: const Text("Đang lấy vị trí..."),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-
-                try {
-                  Position position = await _getCurrentLocation();
-                  Navigator.pop(context);
-                  Navigator.of(context, rootNavigator: true).pop();
-                  if (context.mounted) {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
-                      ),
-                      builder: (context) {
-                        return _buildTimeAndLocationSelectionSheet(
-                            context, position);
-                      },
-                    );
-                  }
-                } catch (e) {
-                  Navigator.of(context, rootNavigator: true)
-                      .pop(); // Đóng loading
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          "Không thể lấy vị trí, vui lòng thử lại: ${e.toString()}",
-                        ),
-                      ),
-                    );
-                  }
-                }
-              },
-            ),
+            context: context,
+            icon: Icons.gps_fixed,
+            label: 'Điểm danh GPS',
+            onTap: () => _handleGPS(context),
           ),
+    ),
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -135,6 +74,100 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<bool> _checkActiveSession(String eventId) async {
+    final url = Uri.parse('https://attendance-7f16.onrender.com/api/attendance/check-active-session/$eventId');
+
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['active'];
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Lỗi khi kiểm tra trạng thái: $e');
+      return false;
+    }
+  }
+
+  void _handleQRCode(BuildContext context) async {
+    bool isActive = await _checkActiveSession(eventId);
+    if (isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã có điểm danh đang hoạt động!")),
+      );
+      return;
+    }
+
+    // Nếu không có, mở giao diện chọn thời gian
+    Navigator.pop(context);
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return _buildTimeSelectionSheet(context);
+      },
+    );
+  }
+
+  void _handleGPS(BuildContext context) async {
+    bool isActive = await _checkActiveSession(eventId);
+    if (isActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã có điểm danh đang hoạt động!")),
+      );
+      return;
+    }
+
+    // Nếu không có, lấy vị trí và mở giao diện chọn thời gian
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              const CircularProgressIndicator(),
+              Container(
+                margin: const EdgeInsets.only(left: 15),
+                child: const Text("Đang lấy vị trí..."),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    try {
+      Position position = await _getCurrentLocation();
+      Navigator.pop(context);
+      Navigator.of(context, rootNavigator: true).pop();
+      if (context.mounted) {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          builder: (context) {
+            return _buildTimeAndLocationSelectionSheet(context, position);
+          },
+        );
+      }
+    } catch (e) {
+      Navigator.of(context, rootNavigator: true).pop();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Không thể lấy vị trí: ${e.toString()}")),
+        );
+      }
+    }
   }
 
   Widget _buildMethodButton({
