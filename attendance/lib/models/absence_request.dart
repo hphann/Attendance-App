@@ -1,4 +1,3 @@
-// lib/models/absence_request.dart
 class AbsenceRequest {
   final String? id;
   final String eventId;

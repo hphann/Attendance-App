@@ -177,7 +177,8 @@ class UserService {
         'avatar': await MultipartFile.fromFile(
           imageFile.path,
           filename: fileName,
-          contentType: MediaType('image', 'jpeg'), // hoặc 'png' tùy vào định dạng
+          contentType:
+              MediaType('image', 'jpeg'), // hoặc 'png' tùy vào định dạng
         ),
       });
 

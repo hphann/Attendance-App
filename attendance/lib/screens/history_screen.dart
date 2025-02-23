@@ -222,8 +222,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                 size: 14, color: Colors.grey.shade600),
                             const SizedBox(width: 4),
                             Text(
-                              DateFormat('HH:mm dd/MM/yyyy')
-                                  .format(attendance.timestamp),
+                              DateFormat('HH:mm - dd/MM/yyyy', 'vi_VN')
+                                  .format(attendance.timestamp.toLocal()),
                               style: TextStyle(
                                 color: Colors.grey.shade600,
                                 fontSize: 13,
@@ -430,7 +430,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
             _buildDetailRow(
               Icons.access_time,
               'Thời gian điểm danh',
-              DateFormat('HH:mm dd/MM/yyyy').format(attendance.timestamp),
+              DateFormat('HH:mm - dd/MM/yyyy', 'vi_VN')
+                  .format(attendance.timestamp.toLocal()),
             ),
             const SizedBox(height: 12),
             _buildDetailRow(

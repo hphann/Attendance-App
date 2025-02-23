@@ -37,7 +37,17 @@ class Attendance {
       if (value is Map) {
         // Handle Firestore Timestamp
         if (value['_seconds'] != null) {
-          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
+          return DateTime.fromMillisecondsSinceEpoch(
+            value['_seconds'] * 1000,
+            isUtc: true,
+          ).toLocal(); // Chuyển đổi sang giờ địa phương
+        }
+        // Thêm xử lý cho Firestore Timestamp
+        if (value['seconds'] != null) {
+          return DateTime.fromMillisecondsSinceEpoch(
+            value['seconds'] * 1000,
+            isUtc: true,
+          ).toLocal(); // Chuyển đổi sang giờ địa phương
         }
       }
 
