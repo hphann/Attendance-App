@@ -1,4 +1,6 @@
 1. Cài đặt và chạy dự án
+Đổi "https://attendance-7f16.onrender.com" thành http://10.0.2.2:3000 (nếu chạy trên máy áo) hoặc http://localhost:3000 (nếu test API)
+
 git clone https://github.com/hphann/Attendance-App.git
 cd attendance
 
