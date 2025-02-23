@@ -64,6 +64,60 @@ class _EventDetailState extends State<EventDetail> {
     }
   }
 
+  Future<void> _downloadReportFile({
+    required DateTime startDate,
+    required DateTime endDate,
+    required String format,
+  }) async {
+    final eventId = widget.event.id;
+    if (eventId == null) return;
+
+    final startStr = startDate.toUtc().toIso8601String();
+    final endStr = endDate
+        .add(const Duration(hours: 23, minutes: 59, seconds: 59))
+        .toUtc()
+        .toIso8601String();
+
+    final url =
+        'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final bytes = response.bodyBytes;
+        final dir = await getTemporaryDirectory();
+        final extension = (format == 'excel') ? 'xlsx' : 'pdf';
+        final filePath = '${dir.path}/report_$eventId.$extension';
+        final file = File(filePath);
+
+        await file.writeAsBytes(bytes);
+
+        try {
+          await OpenFile.open(filePath);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Lỗi khi mở file: ${e.toString()}')),
+          );
+        }
+      } else {
+        // In ra toàn bộ nội dung response để debug
+        print('Response status: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  'Lỗi khi xuất báo cáo: ${response.statusCode} - ${response.body}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
+    }
+  }
+
   Future<void> _loadParticipants() async {
     if (widget.event.id != null) {
       await context
@@ -1086,59 +1140,7 @@ class _EventDetailState extends State<EventDetail> {
     );
   }
 
-  Future<void> _downloadReportFile({
-    required DateTime startDate,
-    required DateTime endDate,
-    required String format,
-  }) async {
-    final eventId = widget.event.id;
-    if (eventId == null) return;
 
-    final startStr = startDate.toUtc().toIso8601String();
-    final endStr = endDate
-        .add(const Duration(hours: 23, minutes: 59, seconds: 59))
-        .toUtc()
-        .toIso8601String();
-
-    final url =
-        'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
-
-    try {
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
-        final dir = await getTemporaryDirectory();
-        final extension = (format == 'excel') ? 'xlsx' : 'pdf';
-        final filePath = '${dir.path}/report_$eventId.$extension';
-        final file = File(filePath);
-
-        await file.writeAsBytes(bytes);
-
-        try {
-          await OpenFile.open(filePath);
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Lỗi khi mở file: ${e.toString()}')),
-          );
-        }
-      } else {
-        // In ra toàn bộ nội dung response để debug
-        print('Response status: ${response.statusCode}');
-        print('Response body: ${response.body}');
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  'Lỗi khi xuất báo cáo: ${response.statusCode} - ${response.body}')),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Lỗi: $e')),
-      );
-    }
-  }
 
   Future<void> refreshData() async {
     setState(() {

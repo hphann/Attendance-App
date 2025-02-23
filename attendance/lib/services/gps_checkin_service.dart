@@ -45,10 +45,22 @@ class GpsService {
       if (response.statusCode == 200) {
         DialogService.showSuccessDialog(context, "Điểm danh thành công!");
       } else {
+        // Giải mã lỗi từ API
+        String errorMessage = "Có lỗi xảy ra. Vui lòng thử lại.";
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          if (responseData.containsKey('message')) {
+            errorMessage = responseData['message']; // Lấy lỗi từ API
+          }
+        } catch (e) {
+          print("Lỗi khi giải mã JSON: $e");
+        }
+
+        // Hiển thị lỗi từ API
         DialogService.showErrorDialog(
           context,
           "Lỗi",
-          "Mã điểm danh không đúng. Vui lòng thử lại",
+          errorMessage,
         );
       }
     } catch (e) {

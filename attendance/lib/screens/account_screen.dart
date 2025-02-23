@@ -1,6 +1,6 @@
-import 'package:attendance/account/ChangePasswordScreen.dart';
-import 'package:attendance/account/EditInfoScreen.dart';
-import 'package:attendance/account/LoginScreen.dart';
+import 'package:attendance/account/change_password_screen.dart';
+import 'package:attendance/account/edit_info_screen.dart';
+import 'package:attendance/account/login_screen.dart';
 import 'package:attendance/screens/history_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,5 +1,5 @@
-import 'package:attendance/account/LoginScreen.dart';
-import 'package:attendance/account/VerifyEmailScreen.dart';
+import 'package:attendance/account/login_screen.dart';
+import 'package:attendance/account/verify_email_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -94,7 +94,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         ),
                         padding: EdgeInsets.only(top: 50, bottom: 30),
                         child: Lottie.asset(
-                          'animation/password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                          'assets/animation/password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
                           width: 250,
                           height: 250,
                           repeat: true,  // Nếu muốn lặp lại animation
