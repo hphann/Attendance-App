@@ -27,7 +27,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<bool> sendResetEmail(String email) async {
     final url = Uri.parse(
-        'https://back-end-attendance-1.onrender.com/api/auth/forgot-password');
+        'https://backendattendance-production.up.railway.app/api/auth/forgot-password');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},

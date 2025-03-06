@@ -77,7 +77,7 @@ class AttendanceMethodsSheet2 extends StatelessWidget {
   }
 
   Future<bool> _checkActiveSession(String eventId) async {
-    final url = Uri.parse('https://back-end-attendance-1.onrender.com/api/attendance/check-active-session/$eventId');
+    final url = Uri.parse('https://backendattendance-production.up.railway.app/api/attendance/check-active-session/$eventId');
 
     try {
       final response = await http.get(url);

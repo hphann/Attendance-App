@@ -28,7 +28,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
   }
 
   Future<bool> changePassword(String email, String password) async {
-    final url = 'https://back-end-attendance-1.onrender.com/api/auth/change-password';
+    final url = 'https://backendattendance-production.up.railway.app/api/auth/change-password';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
@@ -94,7 +94,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                         ),
                         padding: EdgeInsets.only(top: 50, bottom: 30),
                         child: Lottie.asset(
-                          'assets/animation/password.json', // Đảm bảo thay đúng đường dẫn đến file Lottie của bạn
+                          'assets/animation/password.json',
                           width: 250,
                           height: 250,
                           repeat: true,  // Nếu muốn lặp lại animation

@@ -9,7 +9,7 @@ Future<Map<String, dynamic>> createGPSAttendance({
   required DateTime sessionTime,
   required int validMinutes,
 }) async {
-  final url = Uri.parse('https://back-end-attendance-1.onrender.com/api/gps/create-gps');
+  final url = Uri.parse('https://backendattendance-production.up.railway.app/api/gps/create-gps');
   final body = jsonEncode({
     'event_id': eventId,
     'latitude': latitude,

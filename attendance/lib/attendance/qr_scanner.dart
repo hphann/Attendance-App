@@ -38,7 +38,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     _apiUrl = Platform.environment['API_URL'];
 
     // Sử dụng URL mặc định nếu biến môi trường không được thiết lập
-    _apiUrl ??= 'https://back-end-attendance-1.onrender.com/api/qr/scan';
+    _apiUrl ??= 'https://backendattendance-production.up.railway.app/api/qr/scan';
   }
 
   Future<void> _initializeScanner() async {

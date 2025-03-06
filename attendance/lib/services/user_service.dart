@@ -6,7 +6,7 @@ import 'package:http_parser/http_parser.dart';
 
 class UserService {
   final Dio _dio = Dio(BaseOptions(
-    baseUrl: 'https://back-end-attendance-1.onrender.com/api',
+    baseUrl: 'https://backendattendance-production.up.railway.app/api',
     headers: {
       'Content-Type': 'application/json',
     },

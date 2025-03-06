@@ -8,7 +8,7 @@ class GpsService {
   static Future<void> processGpsCheckIn(
       BuildContext context, String userId, String eventId) async {
     const String apiUrl =
-        "https://back-end-attendance-1.onrender.com/api/gps/check-in-gps";
+        "https://backendattendance-production.up.railway.app/api/gps/check-in-gps";
 
     // Hiển thị dialog chờ
     _showLoadingDialog(context);
