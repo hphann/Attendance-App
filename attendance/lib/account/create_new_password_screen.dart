@@ -28,7 +28,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
   }
 
   Future<bool> changePassword(String email, String password) async {
-    final url = 'https://attendance-7f16.onrender.com/api/auth/change-password';
+    final url = 'https://back-end-attendance-1.onrender.com/api/auth/change-password';
     final response = await http.post(
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},

@@ -79,7 +79,7 @@ class _EventDetailState extends State<EventDetail> {
         .toIso8601String();
 
     final url =
-        'https://attendance-7f16.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
+        'https://back-end-attendance-1.onrender.com/api/report-attendance/export?eventId=$eventId&startTime=$startStr&endTime=$endStr&format=$format';
 
     try {
       final response = await http.get(Uri.parse(url));
