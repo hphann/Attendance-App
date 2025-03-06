@@ -102,9 +102,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Tạo DateTime với thời gian chính xác
-      final now = DateTime.now();
-
+      // Tạo DateTime với thời gian local và chuyển sang UTC
       final startDateTime = DateTime(
         _startDate!.year,
         _startDate!.month,
@@ -121,15 +119,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         _endTime!.minute,
       );
 
-      print('Local start time: ${startDateTime.toLocal()}');
-      print('Local end time: ${endDateTime.toLocal()}');
-
+      // Gửi thời gian UTC lên server
       final eventData = {
         'name': _nameController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
-        'startTime': startDateTime.toIso8601String(),
-        'endTime': endDateTime.toIso8601String(),
+        'startTime': startDateTime.toUtc().toIso8601String(),
+        'endTime': endDateTime.toUtc().toIso8601String(),
         'type': 'event',
         'repeat': _selectedRepeat,
         'daysOfWeek': _selectedRepeat == 'Hằng tuần'

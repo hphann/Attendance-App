@@ -74,6 +74,7 @@ class Event {
       if (value == null) return DateTime.now();
       if (value is String) {
         try {
+          // Chuyển đổi từ UTC sang local time
           return DateTime.parse(value).toLocal();
         } catch (e) {
           print('Error parsing date: $e');
@@ -82,6 +83,7 @@ class Event {
       }
       if (value is Map) {
         if (value['_seconds'] != null) {
+          // Timestamp từ Firestore đã ở dạng UTC
           final timestamp =
               DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
           return timestamp.toLocal();
@@ -116,8 +118,8 @@ class Event {
   Map<String, dynamic> toJson() => {
         'name': name,
         'description': description,
-        'startTime': startTime.toUtc().toIso8601String(),
-        'endTime': endTime.toUtc().toIso8601String(),
+        'startTime': startTime.toUtc().toIso8601String(), // Luôn gửi UTC
+        'endTime': endTime.toUtc().toIso8601String(), // Luôn gửi UTC
         'type': type,
         'location': location,
         'createdBy': createdBy,
