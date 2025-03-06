@@ -102,7 +102,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Tạo DateTime với múi giờ địa phương
+      // Tạo DateTime với thời gian chính xác
+      final now = DateTime.now();
+
       final startDateTime = DateTime(
         _startDate!.year,
         _startDate!.month,
@@ -118,6 +120,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         _endTime!.hour,
         _endTime!.minute,
       );
+
+      print('Local start time: ${startDateTime.toLocal()}');
+      print('Local end time: ${endDateTime.toLocal()}');
 
       final eventData = {
         'name': _nameController.text,

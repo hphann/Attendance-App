@@ -70,11 +70,11 @@ class Event {
 
   factory Event.fromJson(Map<String, dynamic> json) {
     print('Parsing Event JSON: $json');
-    DateTime parseDate(dynamic value) {
+    DateTime parseDateTime(dynamic value) {
       if (value == null) return DateTime.now();
       if (value is String) {
         try {
-          return DateTime.parse(value);
+          return DateTime.parse(value).toLocal();
         } catch (e) {
           print('Error parsing date: $e');
           return DateTime.now();
@@ -82,7 +82,9 @@ class Event {
       }
       if (value is Map) {
         if (value['_seconds'] != null) {
-          return DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
+          final timestamp =
+              DateTime.fromMillisecondsSinceEpoch(value['_seconds'] * 1000);
+          return timestamp.toLocal();
         }
       }
       return DateTime.now();
@@ -92,8 +94,8 @@ class Event {
       id: json['id'],
       name: json['name'] ?? '',
       description: json['description'] ?? '',
-      startTime: parseDate(json['startTime']),
-      endTime: parseDate(json['endTime']),
+      startTime: parseDateTime(json['startTime']),
+      endTime: parseDateTime(json['endTime']),
       type: json['type'] ?? 'event',
       location: json['location'] ?? '',
       createdBy: json['createdBy'] ?? '',
@@ -114,8 +116,8 @@ class Event {
   Map<String, dynamic> toJson() => {
         'name': name,
         'description': description,
-        'startTime': startTime.toIso8601String(),
-        'endTime': endTime.toIso8601String(),
+        'startTime': startTime.toUtc().toIso8601String(),
+        'endTime': endTime.toUtc().toIso8601String(),
         'type': type,
         'location': location,
         'createdBy': createdBy,
