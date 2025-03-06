@@ -673,7 +673,7 @@ class _DetailScreenState extends State<DetailScreen> {
                       'Email: ${participant.userInfo?['email'] ?? 'N/A'}',
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
-                    trailing: _buildParticipantStatus(participant.status),
+                    // trailing: _buildParticipantStatus(participant.status),
                   );
                 },
               ),
