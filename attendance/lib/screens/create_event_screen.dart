@@ -102,30 +102,35 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     setState(() => _isLoading = true);
 
     try {
+      // Tạo DateTime với múi giờ địa phương
+      final startDateTime = DateTime(
+        _startDate!.year,
+        _startDate!.month,
+        _startDate!.day,
+        _startTime!.hour,
+        _startTime!.minute,
+      );
+
+      final endDateTime = DateTime(
+        _endDate!.year,
+        _endDate!.month,
+        _endDate!.day,
+        _endTime!.hour,
+        _endTime!.minute,
+      );
+
       final eventData = {
         'name': _nameController.text,
         'description': _descriptionController.text,
         'location': _locationController.text,
-        'startTime': DateTime(
-          _startDate!.year,
-          _startDate!.month,
-          _startDate!.day,
-          _startTime!.hour,
-          _startTime!.minute,
-        ).toIso8601String(),
-        'endTime': DateTime(
-          _endDate!.year,
-          _endDate!.month,
-          _endDate!.day,
-          _endTime!.hour,
-          _endTime!.minute,
-        ).toIso8601String(),
+        'startTime': startDateTime.toIso8601String(),
+        'endTime': endDateTime.toIso8601String(),
         'type': 'event',
         'repeat': _selectedRepeat,
         'daysOfWeek': _selectedRepeat == 'Hằng tuần'
             ? _weekDays
-            .where((day) => _selectedDays[_weekDays.indexOf(day)])
-            .toList()
+                .where((day) => _selectedDays[_weekDays.indexOf(day)])
+                .toList()
             : null,
         'members': _members,
       };
@@ -242,8 +247,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
           // Kiểm tra và thêm các thành viên mới
           for (String email in newMembers) {
-            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                .hasMatch(email)) {
+            if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
               print('Bỏ qua email không hợp lệ: $email');
               continue; // Bỏ qua email không hợp lệ
             }
@@ -306,13 +310,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ),
               child: _isCheckingEmail
                   ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
                   : const Text('Thêm', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -551,21 +555,21 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
                       : const Text(
-                    'Tạo sự kiện',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white,
-                    ),
-                  ),
+                          'Tạo sự kiện',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],
